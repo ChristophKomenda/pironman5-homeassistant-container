@@ -100,4 +100,4 @@ Install the integration through HACS.
 If the repository is not yet available in the default HACS store, add this repository as a custom repository in HACS:
 
 ```text
-https://github.com/ChristophKomenda/pironman5-homeassistant
+https://github.com/ChristophKomenda/pironman5-homeassistant-container
