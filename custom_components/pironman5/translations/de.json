@@ -17,5 +17,22 @@
     "abort": {
       "already_configured": "Dieses Pironman-Gerät ist bereits eingerichtet."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Pironman-Verbindungseinstellungen",
+        "description": "Lokale API-Verbindung und Aktualisierungsintervall ändern.",
+        "data": {
+          "host": "Host / IP-Adresse",
+          "port": "Port",
+          "scan_interval": "Aktualisierungsintervall (Sekunden)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zur Pironman-REST-API nicht möglich.",
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten."
+    }
   }
 }
