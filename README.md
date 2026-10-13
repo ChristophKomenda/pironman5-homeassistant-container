@@ -13,6 +13,51 @@ This project provides a local workaround for **Home Assistant Container** instal
 > **[View HACS Pull Request #10913 →](https://github.com/hacs/default/pull/10913)**
 
 
+## What's New in v1.1.0
+
+### Configurable Connection Settings
+
+Update the Pironman host/IP address, API port, and polling interval
+directly in Home Assistant without removing the integration.
+
+Navigate to **Settings → Devices & Services → Pironman 5 → Configure**.
+
+| Setting | Description |
+| --- | --- |
+| Host / IP | Address of the Pironman device |
+| API port | Default: `34001` |
+| Polling interval | Configurable from 5 to 60 seconds |
+
+Configuration changes automatically reload the integration.
+
+### Dual NVMe Monitoring
+
+The integration provides separate usage sensors for:
+
+- **NVMe 0 Usage** — `/dev/nvme0n1`
+- **NVMe 1 Usage** — `/dev/nvme1n1`
+
+The original NVMe sensor retains its unique ID to preserve
+compatibility with existing Home Assistant installations.
+
+Automatic discovery of additional NVMe or USB drives is not yet supported.
+
+### Remote Home Assistant Support
+
+Home Assistant Container can run on a separate Raspberry Pi.
+
+The integration communicates over the local network with the
+Pironman REST API on the device hosting the Pironman hardware.
+
+Make sure the API port is reachable from Home Assistant.
+
+### Upgrading from v1.0.3
+
+Update the integration and restart Home Assistant.
+
+Existing configuration entries do not need to be removed.
+Use the new **Configure** option to adjust the connection settings.
+
 ## Features
 
 ### Monitoring
@@ -23,7 +68,7 @@ This project provides a local workaround for **Home Assistant Container** instal
 - CPU frequency
 - Memory usage
 - Memory used
-- NVMe usage
+- NVMe 0 and NVMe 1 usage (separate sensors)
 - Network download speed
 - Network upload speed
 - Fan speed
