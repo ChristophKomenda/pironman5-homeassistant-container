@@ -60,10 +60,17 @@ SENSORS = [
     ),
     (
         "nvme_usage",
-        "NVMe Usage",
+        "NVMe 0 Usage",
         None,
         PERCENTAGE,
         "disk_/dev/nvme0n1_percent",
+    ),
+    (
+        "nvme1_usage",
+        "NVMe 1 Usage",
+        None,
+        PERCENTAGE,
+        "disk_/dev/nvme1n1_percent",
     ),
     (
         "network_download",
@@ -136,7 +143,5 @@ class PironmanSensor(PironmanEntity, SensorEntity):
 
     @property
     def native_value(self):
-        return self.coordinator.data.get(
-            self._data_key
-        )
+        return (self.coordinator.data or {}).get(self._data_key)
 

@@ -17,5 +17,22 @@
     "abort": {
       "already_configured": "This Pironman device is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Pironman connection settings",
+        "description": "Update the local API connection and refresh interval.",
+        "data": {
+          "host": "Host / IP address",
+          "port": "Port",
+          "scan_interval": "Update interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the Pironman REST API.",
+      "unknown": "An unexpected error occurred."
+    }
   }
 }
