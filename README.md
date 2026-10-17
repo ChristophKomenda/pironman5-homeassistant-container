@@ -24,6 +24,7 @@ Whether Home Assistant runs on the same Raspberry Pi or on a separate device, th
 - **System monitoring:** Track temperatures, CPU, memory, network activity, and NVMe usage.
 - **Flexible setup:** Change the device IP, API port, and polling interval directly in Home Assistant.
 - **Remote connectivity:** Run Home Assistant on a separate Raspberry Pi or server.
+- **Always-on OLED:** Keep the OLED display active without a sleep timeout.
 
 > **HACS submission pending**
 >
@@ -107,17 +108,68 @@ This makes it easy to include lighting effects in dashboards, scenes, and automa
 
 ### OLED Display
 
-Control the **Pironman 5 Max OLED display** directly from Home Assistant.
+Control the Pironman OLED display directly from Home Assistant.
 
-Supported options:
+**Supported options**
 
-- Enable or disable the display
-- Rotate the display (0° / 180°)
-- Configure the sleep timeout
-- Select the primary OLED page
-- Synchronize settings with the Pironman API
+- Enable or disable the OLED display.
+- Keep the OLED permanently active with **OLED Always On**.
+- Configure the OLED sleep timeout.
+- Rotate the display (0° / 180°).
+- Select the primary OLED page.
+- Synchronize settings with the local Pironman API.
 
 **Available OLED pages:** Mix, Performance, IPs, Disk.
+
+#### OLED Always On
+
+The **OLED Always On** switch allows the display to remain active indefinitely, bypassing the normal sleep timer.
+
+This is particularly useful when using the Pironman as a continuously visible system-monitoring display.
+
+| Switch state | Behavior |
+|---|---|
+| On | Disables automatic OLED sleep by setting the timeout to `0` |
+| Off | Restores the previously configured sleep timeout |
+
+**How it works**
+
+1. Open the Pironman device in Home Assistant.
+2. Find the **OLED Always On** switch.
+3. Turn it on to disable automatic sleep.
+4. Turn it off to restore the previous sleep timeout.
+
+The switch uses the existing SunFounder REST API endpoint and does not require an additional service or MQTT broker.
+
+**Timeout restoration**
+
+When Always On is enabled, the integration remembers the last positive sleep timeout observed during the current Home Assistant session.
+
+When disabled, it restores that value.
+
+If the previous timeout is unavailable, the integration uses a fallback of **10 seconds**.
+
+**Important notes**
+
+- Always On does not override the main OLED enable/disable switch. The OLED must still be enabled.
+- The Always On state is derived from the timeout reported by the Pironman API.
+- The timeout value `0` represents unlimited runtime in the supported SunFounder OLED software.
+- The previous timeout is remembered in memory, not stored persistently by Home Assistant.
+- After an integration restart, the previous timeout may no longer be available.
+- Continuous OLED operation may increase the risk of display wear or burn-in.
+
+#### OLED Sleep Timeout
+
+The existing **OLED Sleep Timeout** number entity allows you to configure the automatic sleep delay.
+
+| Value | Behavior |
+|---|---|
+| `0` seconds | No automatic sleep |
+| `1–3600` seconds | Automatic sleep after the configured timeout |
+
+Setting the timeout to `0` directly has the same sleep-disabling effect as enabling the Always On switch.
+
+The Always On switch provides a more convenient way to toggle this behavior while restoring the previous timeout when possible.
 
 ## Requirements
 
@@ -130,6 +182,8 @@ Supported options:
 | Default API port | `34001` |
 
 The Pironman REST API must be running and accessible from your Home Assistant installation.
+
+The OLED controls require compatible Pironman hardware and firmware exposing the corresponding API settings.
 
 ## Installation
 
@@ -162,6 +216,9 @@ Once the HACS submission is approved, the integration may become available throu
            ├── __init__.py
            ├── config_flow.py
            ├── coordinator.py
+           ├── oled.py
+           ├── switch.py
+           ├── number.py
            ├── manifest.json
            └── ...
    ```
@@ -251,6 +308,16 @@ Existing installations can be updated without removing their configuration entri
 - Adds separate NVMe 0 and NVMe 1 usage sensors.
 - Preserves the existing NVMe sensor's unique ID.
 
+**OLED Always On enhancement**
+
+- Adds a dedicated **OLED Always On** switch.
+- Disables automatic OLED sleep using the existing API.
+- Restores the previously observed positive timeout when Always On is disabled.
+- Uses a 10-second fallback when no previous timeout is known.
+- Preserves the existing OLED enable/disable and timeout entities.
+
+After updating, restart Home Assistant to register the new switch entity.
+
 ## Troubleshooting
 
 ### Integration Cannot Connect
@@ -285,6 +352,52 @@ The second NVMe sensor reads data from `/dev/nvme1n1`.
 
 If the Pironman API does not expose that device, the sensor may be unavailable.
 
+### OLED Always On Switch Is Missing
+
+If the switch does not appear after updating:
+
+1. Confirm the latest integration files are installed.
+2. Restart Home Assistant.
+3. Open **Settings → Devices & Services → Pironman 5**.
+4. Check the device's available entities.
+5. Verify that `switch.py` contains the `PironmanOLEDAlwaysOnSwitch` class.
+
+The switch uses the unique ID suffix `_oled_always_on`.
+
+### OLED Always On Switch Is Unavailable
+
+The switch requires the `oled_sleep_timeout` setting to be present in the Pironman API response.
+
+Check the configuration endpoint:
+
+```bash
+curl http://PIRONMAN_IP:34001/api/v1.0/get-config
+```
+
+Verify that the returned system configuration includes `oled_sleep_timeout`.
+
+If the setting is missing, check the installed Pironman software and API compatibility.
+
+### OLED Still Turns Off with Always On Enabled
+
+- Confirm the main OLED switch is enabled.
+- Check that the reported sleep timeout is `0`.
+- Verify that the Pironman software supports a zero-second timeout.
+- Check whether another application or service is modifying the OLED configuration.
+- Review the Home Assistant and Pironman service logs.
+
+The Always On feature disables the automatic sleep timer; it does not prevent the display from being turned off manually or during shutdown.
+
+### Previous OLED Timeout Was Not Restored
+
+The integration remembers the previous positive timeout only during the current Home Assistant session.
+
+If Home Assistant or the integration restarts while Always On is active, the original timeout may no longer be known.
+
+In that case, disabling Always On restores the default fallback of **10 seconds**.
+
+You can set your preferred timeout again using the **OLED Sleep Timeout** entity.
+
 ### Configuration Changes Do Not Apply
 
 Save the integration options and allow Home Assistant to reload the integration.
@@ -298,6 +411,7 @@ Potential future improvements include:
 - Automatic NVMe and USB storage discovery
 - Additional hardware monitoring entities
 - Expanded diagnostics and troubleshooting
+- Persistent storage of the previous OLED timeout
 - Further dashboard and automation examples
 
 Feature requests and contributions are welcome.
