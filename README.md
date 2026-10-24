@@ -2,43 +2,57 @@
 
 **Monitor and control your SunFounder Pironman 5 or Pironman 5 Max directly from Home Assistant.**
 
-A lightweight, fully local custom integration for Home Assistant, including **Home Assistant Container** installations.
+A fully local, lightweight custom integration for Home Assistant, with support for **Home Assistant Container**, remote Raspberry Pi installations, and the official **Home Assistant Community Store (HACS)**.
 
-**No MQTT · No cloud dependency · Local REST API · Configurable polling**
+**Local REST API · No MQTT · No cloud dependency · Configurable polling · Native Home Assistant entities**
 
-[Installation](#installation) · [Features](#features) · [Configuration](#configuration) · [Troubleshooting](#troubleshooting)
+[Installation](#installation) · [Features](#features) · [Configuration](#configuration) · [Troubleshooting](#troubleshooting) · [Releases](#releases)
+
+---
+
+## Official HACS Integration
+
+**Pironman 5 is officially included in the HACS default repository!**
+
+The integration was reviewed and accepted by the HACS maintainers through [Pull Request #12242](https://github.com/hacs/default/pull/12242).
+
+You can install it directly through HACS without manually adding a custom repository.
+
+**Current version: v1.1.3**
+
+[Latest Release](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases/latest) · [Report an Issue](https://github.com/ChristophKomenda/pironman5-homeassistant-container/issues) · [Source Code](https://github.com/ChristophKomenda/pironman5-homeassistant-container)
 
 ---
 
 ## Overview
 
-Bring your Pironman hardware into Home Assistant with real-time system monitoring and direct control over fans, RGB lighting, and the OLED display.
+Bring your Pironman hardware into Home Assistant with system monitoring and direct control over cooling, RGB lighting, and the OLED display.
 
-Whether Home Assistant runs on the same Raspberry Pi or on a separate device, the integration communicates directly with the Pironman REST API over your local network.
+The integration communicates with the Pironman software through its local REST API.
+
+Home Assistant and the Pironman hardware can run on the same Raspberry Pi or on separate devices connected through your local network.
 
 ### Why use this integration?
 
-- **Fully local:** No cloud account or MQTT broker required.
-- **Container-friendly:** Designed to work with Home Assistant Container.
-- **Hardware control:** Manage fan settings, RGB lighting, and OLED options.
-- **System monitoring:** Track temperatures, CPU, memory, network activity, and NVMe usage.
-- **Flexible setup:** Change the device IP, API port, and polling interval directly in Home Assistant.
-- **Remote connectivity:** Run Home Assistant on a separate Raspberry Pi or server.
-- **Always-on OLED:** Keep the OLED display active without a sleep timeout.
+- **Fully local:** No cloud services, external accounts, or MQTT broker required.
+- **Official HACS support:** Install and update directly through HACS.
+- **Container-friendly:** Compatible with Home Assistant Container installations.
+- **Hardware monitoring:** Track CPU, GPU, memory, NVMe storage, network activity, and cooling.
+- **Fan management:** Change cooling profiles directly from Home Assistant.
+- **RGB control:** Manage lighting, colors, brightness, and effects.
+- **OLED control:** Configure display behavior, pages, rotation, and sleep timeout.
+- **Flexible configuration:** Change the host, API port, and polling interval without reinstalling.
+- **Remote access:** Connect Home Assistant to a Pironman running on another Raspberry Pi.
 
-> **HACS submission pending**
->
-> The integration has been submitted to the official HACS default repository and is awaiting review.
->
-> [View HACS Pull Request #10913](https://github.com/hacs/default/pull/10913)
+---
 
 ## Features
 
 ### System Monitoring
 
-Monitor your Pironman hardware through native Home Assistant entities.
+Monitor your Raspberry Pi and Pironman hardware through native Home Assistant sensor entities.
 
-| Category | Available sensors |
+| Category | Available measurements |
 |---|---|
 | CPU | Temperature, usage, frequency |
 | GPU | Temperature |
@@ -47,22 +61,26 @@ Monitor your Pironman hardware through native Home Assistant entities.
 | Network | Download speed, upload speed |
 | Cooling | Fan speed, fan running status |
 
-**Dual NVMe monitoring (v1.1.0)**
+Sensor availability depends on the hardware and information exposed by the installed Pironman software.
 
-Monitor two NVMe drives independently:
+### Dual NVMe Monitoring
 
-- NVMe 0: `/dev/nvme0n1`
-- NVMe 1: `/dev/nvme1n1`
+The integration supports monitoring two NVMe drives independently.
 
-The existing NVMe sensor retains its unique ID to maintain compatibility with previous installations.
+| Drive | Device path |
+|---|---|
+| NVMe 0 | `/dev/nvme0n1` |
+| NVMe 1 | `/dev/nvme1n1` |
 
-> NVMe device paths are currently fixed. Automatic discovery of additional NVMe and USB drives is planned as a potential future improvement.
+The original NVMe sensor retains its existing unique ID to preserve compatibility with earlier installations.
+
+**Note:** NVMe device paths are currently fixed. Automatic storage discovery is a potential future enhancement.
 
 ### Fan Control
 
-Adjust your Pironman's cooling behavior directly from Home Assistant.
+Manage cooling behavior without opening the Pironman dashboard.
 
-**Available fan modes**
+**Available fan profiles:**
 
 - Always On
 - Performance
@@ -70,181 +88,185 @@ Adjust your Pironman's cooling behavior directly from Home Assistant.
 - Balanced
 - Quiet
 
-**GPIO Fan LED**
+**GPIO Fan LED modes:**
 
 - On
 - Off
 - Follow
 
-Fan settings are managed through the local Pironman REST API.
+Fan settings are sent to the local Pironman REST API.
 
 ### RGB Lighting
 
-Control your Pironman's RGB lighting without leaving Home Assistant.
+Control your Pironman's RGB lighting using Home Assistant.
 
-**Controls**
+**Available controls:**
 
-- RGB power on/off
+- RGB power
 - Brightness
 - Color
-- Effect selection
+- Lighting effect
 - Effect speed
 
-**Available effects**
+**Supported effects:**
 
 | Effect | Description |
 |---|---|
 | Solid | Static color |
 | Breathing | Pulsing brightness |
 | Flow | Flowing color animation |
-| Flow Reverse | Reverse flow animation |
-| Rainbow | Rainbow animation |
+| Flow Reverse | Reverse flowing animation |
+| Rainbow | Rainbow lighting |
 | Rainbow Reverse | Reverse rainbow animation |
 | Hue Cycle | Continuous color cycling |
 
-RGB effects can be selected through the RGB Light entity or the dedicated **RGB Effect** select entity.
+Effects can be selected through the RGB light entity or the dedicated RGB Effect select entity.
 
-This makes it easy to include lighting effects in dashboards, scenes, and automations.
+RGB lighting can also be used in Home Assistant dashboards, scenes, and automations.
 
 ### OLED Display
 
-Control the Pironman OLED display directly from Home Assistant.
+Configure the Pironman OLED display from Home Assistant.
 
-**Supported options**
+**Available controls:**
 
-- Enable or disable the OLED display.
-- Keep the OLED permanently active with **OLED Always On**.
-- Configure the OLED sleep timeout.
-- Rotate the display (0° / 180°).
-- Select the primary OLED page.
-- Synchronize settings with the local Pironman API.
+- Enable or disable the display
+- OLED Always On
+- Sleep timeout
+- Display rotation
+- Primary OLED page
 
-**Available OLED pages:** Mix, Performance, IPs, Disk.
+**Supported pages:**
 
-#### OLED Always On
+- Mix
+- Performance
+- IPs
+- Disk
 
-The **OLED Always On** switch allows the display to remain active indefinitely, bypassing the normal sleep timer.
+OLED functionality depends on compatible Pironman hardware and API support.
 
-This is particularly useful when using the Pironman as a continuously visible system-monitoring display.
+### OLED Always On
 
-| Switch state | Behavior |
+The **OLED Always On** switch allows the display to remain active without an automatic sleep timeout.
+
+| State | Behavior |
 |---|---|
-| On | Disables automatic OLED sleep by setting the timeout to `0` |
-| Off | Restores the previously configured sleep timeout |
+| On | Sets the OLED sleep timeout to `0` |
+| Off | Restores the previously observed positive timeout |
 
-**How it works**
+The feature uses the existing Pironman REST API.
+
+**How to use it:**
 
 1. Open the Pironman device in Home Assistant.
-2. Find the **OLED Always On** switch.
-3. Turn it on to disable automatic sleep.
-4. Turn it off to restore the previous sleep timeout.
+2. Locate the **OLED Always On** switch.
+3. Enable it to disable automatic sleep.
+4. Disable it to restore the previous timeout.
 
-The switch uses the existing SunFounder REST API endpoint and does not require an additional service or MQTT broker.
+**Important behavior:**
 
-**Timeout restoration**
+- The main OLED enable switch must remain enabled.
+- The Always On state is derived from the timeout reported by the API.
+- A timeout of `0` means no automatic sleep in supported Pironman software.
+- The previous timeout is remembered only during the current Home Assistant session.
+- If the previous value is unavailable, the integration uses a fallback of **10 seconds**.
+- Continuous OLED operation may increase display wear or burn-in risk.
 
-When Always On is enabled, the integration remembers the last positive sleep timeout observed during the current Home Assistant session.
+### OLED Sleep Timeout
 
-When disabled, it restores that value.
-
-If the previous timeout is unavailable, the integration uses a fallback of **10 seconds**.
-
-**Important notes**
-
-- Always On does not override the main OLED enable/disable switch. The OLED must still be enabled.
-- The Always On state is derived from the timeout reported by the Pironman API.
-- The timeout value `0` represents unlimited runtime in the supported SunFounder OLED software.
-- The previous timeout is remembered in memory, not stored persistently by Home Assistant.
-- After an integration restart, the previous timeout may no longer be available.
-- Continuous OLED operation may increase the risk of display wear or burn-in.
-
-#### OLED Sleep Timeout
-
-The existing **OLED Sleep Timeout** number entity allows you to configure the automatic sleep delay.
+The OLED Sleep Timeout entity provides direct control over the display's automatic sleep behavior.
 
 | Value | Behavior |
 |---|---|
 | `0` seconds | No automatic sleep |
-| `1–3600` seconds | Automatic sleep after the configured timeout |
+| `1–3600` seconds | Automatic sleep after the selected timeout |
 
-Setting the timeout to `0` directly has the same sleep-disabling effect as enabling the Always On switch.
+The Always On switch provides a convenient alternative to manually changing the timeout.
 
-The Always On switch provides a more convenient way to toggle this behavior while restoring the previous timeout when possible.
+---
 
 ## Requirements
 
 | Component | Requirement |
 |---|---|
 | Hardware | SunFounder Pironman 5 or Pironman 5 Max |
-| Home Assistant | Home Assistant with support for custom integrations |
-| Pironman software | Running with the local REST API enabled |
+| Home Assistant | Version 2024.1.0 or newer |
+| Pironman software | Running with its local REST API available |
 | Network | Home Assistant must be able to reach the Pironman API |
 | Default API port | `34001` |
+| Installation | HACS or manual custom integration |
 
-The Pironman REST API must be running and accessible from your Home Assistant installation.
+The Pironman software must be installed and running on the Raspberry Pi.
 
-The OLED controls require compatible Pironman hardware and firmware exposing the corresponding API settings.
+The integration communicates with the local API and does not replace the underlying Pironman software.
+
+---
 
 ## Installation
 
 ### Option A — HACS (Recommended)
 
-Until the integration is available in the default HACS repository, install it as a custom repository.
+Pironman 5 is available through the official HACS repository.
 
 1. Open **HACS** in Home Assistant.
-2. Open the menu and select **Custom repositories**.
-3. Add the following repository URL:
+2. Search for **Pironman 5**.
+3. Open the integration page.
+4. Select **Download**.
+5. Follow the installation prompts.
+6. Restart Home Assistant when prompted.
 
-   `https://github.com/ChristophKomenda/pironman5-homeassistant-container`
+After installation, continue with [Configuration](#configuration).
 
-4. Select **Integration** as the repository category.
-5. Add the repository and install the integration.
-6. Restart Home Assistant.
+**Previously installed as a custom repository?**
 
-Once the HACS submission is approved, the integration may become available through the default HACS catalog.
+If you added this repository manually before its official HACS inclusion, you can continue using the existing integration. Avoid creating duplicate installations; review your HACS repository settings if needed.
 
 ### Option B — Manual Installation
 
-1. Download or clone this repository.
-2. Copy the `custom_components/pironman5` directory into your Home Assistant configuration directory.
-3. Ensure the directory structure looks like this:
-
-   ```text
-   config/
-   └── custom_components/
-       └── pironman5/
-           ├── __init__.py
-           ├── config_flow.py
-           ├── coordinator.py
-           ├── oled.py
-           ├── switch.py
-           ├── number.py
-           ├── manifest.json
-           └── ...
-   ```
-
+1. Download the [latest release](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases/latest).
+2. Extract the repository.
+3. Copy the `custom_components/pironman5` directory into your Home Assistant configuration directory.
 4. Restart Home Assistant.
+
+Your installation should contain:
+
+```text
+config/
+└── custom_components/
+    └── pironman5/
+        ├── __init__.py
+        ├── config_flow.py
+        ├── coordinator.py
+        ├── manifest.json
+        ├── strings.json
+        ├── translations/
+        │   ├── en.json
+        │   └── de.json
+        └── ...
+```
 
 For Home Assistant Container, the configuration directory is typically mounted as `/config` inside the container.
 
+---
+
 ## Configuration
 
-### First-Time Setup
+### Initial Setup
 
-After installation:
+After installing and restarting Home Assistant:
 
-1. Open **Settings → Devices & Services**.
-2. Select **Add Integration**.
+1. Navigate to **Settings → Devices & Services**.
+2. Click **Add Integration**.
 3. Search for **Pironman 5**.
 4. Enter the IP address or hostname of the Raspberry Pi running the Pironman API.
-5. Enter the API port (default: `34001`).
+5. Enter the API port, normally `34001`.
 6. Complete the setup.
 
-Home Assistant will connect to the Pironman REST API and create the supported entities.
+Home Assistant will connect to the local Pironman API and create the supported entities.
 
-### Change Connection Settings (v1.1.0)
+### Connection Settings
 
-You can update the connection without removing or reinstalling the integration.
+Connection settings can be changed without removing and reinstalling the integration.
 
 Navigate to:
 
@@ -252,79 +274,107 @@ Navigate to:
 
 | Setting | Description |
 |---|---|
-| Host / IP address | Pironman device IP or hostname |
+| Host / IP address | Address of the Raspberry Pi running Pironman |
 | API port | Default: `34001` |
-| Polling interval | 5–60 seconds |
+| Polling interval | Configurable between 5 and 60 seconds |
 
-The integration reloads automatically after configuration changes.
+The integration reloads automatically after saving configuration changes.
 
 A polling interval of **10 seconds** is a reasonable starting point for many installations.
 
-## Supported Setups
+Shorter intervals provide more frequent updates but increase API requests.
 
-### Same Raspberry Pi
+Longer intervals reduce polling activity.
 
-Home Assistant and the Pironman REST API run on the same device.
+---
 
-Configure the integration using the API address reachable from Home Assistant.
+## Supported Deployment Scenarios
 
-### Separate Raspberry Pis or Servers
+### Home Assistant on the Same Raspberry Pi
 
-Home Assistant can run on a different device from the Pironman hardware.
+Home Assistant and the Pironman REST API can run on the same Raspberry Pi.
+
+When using Home Assistant Container, configure the address that is reachable from inside the container.
+
+Depending on the Docker network configuration, `127.0.0.1` may refer to the container itself rather than the Raspberry Pi host.
+
+Using the Raspberry Pi's LAN IP address is often the simplest option.
+
+### Home Assistant on a Separate Device
+
+The integration also supports installations where Home Assistant runs on a different Raspberry Pi or home server.
 
 ```text
-Raspberry Pi 5 — Pironman 5 Max
+Raspberry Pi 5
+SunFounder Pironman 5 / 5 Max
 │
 ├── Pironman hardware
-├── Pironman REST API
-└── Port 34001
+├── Pironman software
+└── Local REST API
+    Port 34001
          │
          │ Local network
          │
          ▼
-Raspberry Pi / Home Server
+Home Assistant Host
 │
-├── Home Assistant Container
+├── Home Assistant
+│   or Home Assistant Container
+│
 └── Pironman 5 Integration
 ```
 
-For this setup, use the network IP address of the Raspberry Pi with the Pironman hardware, not `127.0.0.1`.
+Configure the integration with the network address of the Raspberry Pi hosting the Pironman API.
 
-Ensure the API port is accessible from the Home Assistant host.
+Ensure that the configured API port is reachable from Home Assistant.
 
-## Upgrading
+### Network and Security
 
-Existing installations can be updated without removing their configuration entries.
+The Pironman API is intended for communication within a trusted local network.
 
-1. Update the integration through HACS or replace the integration files manually.
-2. Restart Home Assistant.
-3. Open the Pironman integration under **Devices & Services**.
-4. Use **Configure** to review connection settings.
-5. Check that your sensors and controls are available.
+For security:
 
-**Upgrading to v1.1.0**
+- Keep the API accessible only to trusted devices.
+- Avoid exposing port `34001` directly to the internet.
+- Use appropriate firewall rules and network segmentation.
+- Keep the Pironman software and Home Assistant updated.
 
-- Adds configurable host, API port, and polling interval.
-- Adds separate NVMe 0 and NVMe 1 usage sensors.
-- Preserves the existing NVMe sensor's unique ID.
+---
 
-**OLED Always On enhancement**
+## Updating
 
-- Adds a dedicated **OLED Always On** switch.
-- Disables automatic OLED sleep using the existing API.
-- Restores the previously observed positive timeout when Always On is disabled.
-- Uses a 10-second fallback when no previous timeout is known.
-- Preserves the existing OLED enable/disable and timeout entities.
+### HACS Updates
 
-After updating, restart Home Assistant to register the new switch entity.
+For installations managed through HACS:
+
+1. Open HACS.
+2. Check for an available Pironman 5 update.
+3. Download the new version.
+4. Restart Home Assistant when required.
+5. Verify that the entities are available.
+
+Existing configuration entries should normally remain intact during updates.
+
+### Manual Updates
+
+For manual installations:
+
+1. Download the latest release.
+2. Replace the files in `custom_components/pironman5`.
+3. Restart Home Assistant.
+4. Verify the integration under **Devices & Services**.
+
+Avoid mixing files from different releases.
+
+---
 
 ## Troubleshooting
 
 ### Integration Cannot Connect
 
-Verify that the Pironman REST API is running and reachable.
+Check whether the Pironman REST API is reachable.
 
-From the Home Assistant host, test:
+From the Home Assistant host, run:
 
 ```bash
 curl http://PIRONMAN_IP:34001/api/v1.0/get-data
@@ -334,102 +384,171 @@ Replace `PIRONMAN_IP` with the actual IP address of your Pironman device.
 
 If the request fails:
 
-- Confirm the IP address and API port.
-- Verify the Pironman service is running.
-- Check network connectivity and firewall rules.
-- For Docker installations, ensure the container can reach the Pironman device.
+- Verify the IP address and port.
+- Confirm that the Pironman software is running.
+- Check network connectivity.
+- Review firewall settings.
+- For Docker installations, verify connectivity from the container network.
 
 ### Sensors Are Unavailable
 
-- Check that the API returns data.
-- Confirm the integration is configured with the correct host.
+- Verify that the Pironman API returns valid data.
+- Check the configured host and port.
+- Confirm the relevant hardware is installed.
 - Review the Home Assistant logs.
-- Verify that the expected hardware is installed.
+- Restart the integration if necessary.
 
-### Second NVMe Sensor Has No Value
+### Second NVMe Sensor Is Unavailable
 
-The second NVMe sensor reads data from `/dev/nvme1n1`.
+The second NVMe sensor expects data for `/dev/nvme1n1`.
 
-If the Pironman API does not expose that device, the sensor may be unavailable.
+If that device is missing or the Pironman API does not expose its usage, the sensor may be unavailable.
 
 ### OLED Always On Switch Is Missing
 
-If the switch does not appear after updating:
-
-1. Confirm the latest integration files are installed.
+1. Confirm the latest integration version is installed.
 2. Restart Home Assistant.
 3. Open **Settings → Devices & Services → Pironman 5**.
-4. Check the device's available entities.
-5. Verify that `switch.py` contains the `PironmanOLEDAlwaysOnSwitch` class.
+4. Inspect the device's available entities.
+5. Check the Home Assistant logs.
 
 The switch uses the unique ID suffix `_oled_always_on`.
 
-### OLED Always On Switch Is Unavailable
+### OLED Always On Is Unavailable
 
-The switch requires the `oled_sleep_timeout` setting to be present in the Pironman API response.
+The switch requires the `oled_sleep_timeout` setting from the Pironman API.
 
-Check the configuration endpoint:
+Check:
 
 ```bash
 curl http://PIRONMAN_IP:34001/api/v1.0/get-config
 ```
 
-Verify that the returned system configuration includes `oled_sleep_timeout`.
+Verify that the response includes `oled_sleep_timeout`.
 
-If the setting is missing, check the installed Pironman software and API compatibility.
+If it is missing, review your installed Pironman software version and API compatibility.
 
-### OLED Still Turns Off with Always On Enabled
+### OLED Still Turns Off
 
-- Confirm the main OLED switch is enabled.
-- Check that the reported sleep timeout is `0`.
-- Verify that the Pironman software supports a zero-second timeout.
-- Check whether another application or service is modifying the OLED configuration.
-- Review the Home Assistant and Pironman service logs.
+- Verify that the main OLED switch is enabled.
+- Check that the API reports a sleep timeout of `0`.
+- Confirm that the Pironman software supports disabling automatic sleep.
+- Check whether another service changes the OLED configuration.
+- Review the Home Assistant and Pironman logs.
 
-The Always On feature disables the automatic sleep timer; it does not prevent the display from being turned off manually or during shutdown.
+OLED Always On disables the automatic sleep timer. It does not prevent shutdown or manual display deactivation.
 
-### Previous OLED Timeout Was Not Restored
+### Previous OLED Timeout Is Not Restored
 
-The integration remembers the previous positive timeout only during the current Home Assistant session.
+The previous positive timeout is stored only in memory during the current Home Assistant session.
 
-If Home Assistant or the integration restarts while Always On is active, the original timeout may no longer be known.
+If Home Assistant or the integration restarts, that value may be lost.
 
-In that case, disabling Always On restores the default fallback of **10 seconds**.
+In that case, disabling Always On restores the fallback of **10 seconds**.
 
-You can set your preferred timeout again using the **OLED Sleep Timeout** entity.
+You can manually configure your preferred timeout again.
 
 ### Configuration Changes Do Not Apply
 
-Save the integration options and allow Home Assistant to reload the integration.
+Save the updated settings and allow Home Assistant to reload the integration.
 
-If the problem persists, restart Home Assistant and check the logs.
+If necessary, restart Home Assistant and review the logs.
+
+---
+
+## Releases
+
+### v1.1.3 — HACS Maintenance Release
+
+- Updated documentation and issue tracker URLs to the current repository.
+- Updated integration version to `1.1.3`.
+- Maintenance release following official HACS inclusion.
+- No intended functional changes.
+
+### v1.1.2 — English Translation Fix
+
+- Added `translations/en.json`.
+- Ensured English fallback translations are available for the configuration flow.
+- Addressed feedback from the HACS review process.
+
+### v1.1.x — Configuration and Monitoring Improvements
+
+- Configurable host and API port.
+- Configurable polling interval.
+- Independent NVMe 0 and NVMe 1 monitoring.
+- Preservation of the original NVMe sensor's unique ID.
+
+### Earlier Enhancements
+
+- OLED Always On switch.
+- OLED sleep timeout restoration behavior.
+- Existing hardware monitoring and control capabilities.
+
+For the complete release history, visit [GitHub Releases](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases).
+
+---
 
 ## Roadmap
 
 Potential future improvements include:
 
 - Automatic NVMe and USB storage discovery
-- Additional hardware monitoring entities
-- Expanded diagnostics and troubleshooting
+- Additional system and hardware monitoring entities
+- More diagnostic information
 - Persistent storage of the previous OLED timeout
-- Further dashboard and automation examples
+- Additional dashboard examples
+- More Home Assistant automation examples
+- Further localization improvements
 
-Feature requests and contributions are welcome.
+These are potential enhancements rather than committed release features.
 
-## Contributing
-
-Contributions, bug reports, and feature suggestions are appreciated.
-
-If you discover an issue or have an idea for improvement, please open an issue or pull request on GitHub.
-
-[Report an issue](https://github.com/ChristophKomenda/pironman5-homeassistant-container/issues)
-
-## License
-
-See the repository's license file for licensing information.
+Suggestions and contributions are welcome.
 
 ---
 
-**Built for the SunFounder Pironman community.**
+## Contributing
+
+Contributions, bug reports, translations, and feature suggestions are appreciated.
+
+If you discover a problem or would like to propose an improvement:
+
+1. Check the existing GitHub issues.
+2. Open a new issue with a clear description.
+3. Include relevant hardware and software versions.
+4. Provide logs or reproduction steps when appropriate.
+5. Submit a pull request if you would like to contribute code.
+
+**Useful links:**
+
+- [Issue Tracker](https://github.com/ChristophKomenda/pironman5-homeassistant-container/issues)
+- [Pull Requests](https://github.com/ChristophKomenda/pironman5-homeassistant-container/pulls)
+- [Latest Release](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases/latest)
+- [GitHub Actions](https://github.com/ChristophKomenda/pironman5-homeassistant-container/actions)
+
+Please avoid posting passwords, access tokens, or other sensitive information in issues or logs.
+
+---
+
+## License
+
+See the [LICENSE](LICENSE) file for the applicable license terms.
+
+---
+
+## Acknowledgements
+
+Thanks to [SunFounder](https://www.sunfounder.com/) for the Pironman hardware and software ecosystem.
+
+Special thanks to the Home Assistant community and the HACS maintainers for their work supporting custom integrations.
+
+The integration was officially accepted into HACS through [hacs/default#12242](https://github.com/hacs/default/pull/12242).
+
+---
+
+## Maintainer
 
 Developed and maintained by [Christoph Komenda](https://github.com/ChristophKomenda).
+
+**Built for the SunFounder Pironman community.**
+
+If you find this integration useful, consider starring the repository on GitHub!
