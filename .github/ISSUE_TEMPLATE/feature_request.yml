@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest an improvement to the integration
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What would this improvement help you do?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature area
+      options:
+        - Sensors and monitoring
+        - Fan control
+        - RGB lighting
+        - OLED display
+        - Configuration and connectivity
+        - Documentation
+        - Other
+  - type: textarea
+    id: details
+    attributes:
+      label: Additional context
+      description: Hardware, API capabilities, screenshots, or links
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and the roadmap.
+          required: true

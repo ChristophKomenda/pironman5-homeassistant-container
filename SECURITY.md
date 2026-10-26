@@ -1,21 +1,27 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Security fixes are targeted at the latest stable release. Older releases may not receive security updates.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+## Reporting a vulnerability
 
-## Reporting a Vulnerability
+Please **do not open a public issue** for a suspected security vulnerability.
 
-Use this section to tell people how to report a vulnerability.
+If GitHub Private Vulnerability Reporting is enabled, use **Security → Report a vulnerability** in this repository. Otherwise contact the maintainer privately through an agreed secure channel. Do not send exploits or secrets through public discussions.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Include the affected versions, a concise description, reproduction steps, and potential impact. Please allow reasonable time for investigation and coordinated disclosure.
+
+## Network security
+
+This integration uses the Pironman local REST API, normally on TCP port `34001`.
+
+- Keep the API accessible only to trusted devices on your LAN.
+- Never expose port `34001` directly to the public internet.
+- Use firewall rules and network segmentation where appropriate.
+- Keep Home Assistant, the integration, and upstream Pironman software updated.
+- Remove tokens, credentials, personal data, and public IPs from shared logs.
+
+## Scope
+
+This repository maintains the Home Assistant integration, not the upstream SunFounder Pironman software. Please also notify upstream maintainers if the vulnerability affects their software.
