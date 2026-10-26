@@ -16,11 +16,20 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 > [!IMPORTANT]
 > **Official HACS default repository integration.** Pironman 5 was reviewed and accepted via [hacs/default#12242](https://github.com/hacs/default/pull/12242). Find **Pironman 5** directly in HACS; no custom repository URL is needed.
 
+
 ## Integration Preview
 
-![Pironman 5 and Pironman 5 Max integration overview in Home Assistant](images/pironman5-home-assistant-integration-overview.png)
+<p align="left">
+  <img
+    src="images/pironman5-home-assistant-integration-overview.png"
+    alt="Pironman 5 and Pironman 5 Max integration overview in Home Assistant"
+    width="200"
+  />
+</p>
 
-*Monitor your Raspberry Pi and manage Pironman hardware directly from Home Assistant.*
+<p align="left">
+  <em>Monitor your Raspberry Pi and manage Pironman hardware directly from Home Assistant.</em>
+</p>
 
 ## At a glance
 
