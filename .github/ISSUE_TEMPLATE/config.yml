@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Installation and troubleshooting guide
+    url: https://github.com/ChristophKomenda/pironman5-homeassistant-container#troubleshooting
+    about: Review the README before opening an issue.
+  - name: Security reporting instructions
+    url: https://github.com/ChristophKomenda/pironman5-homeassistant-container/blob/main/SECURITY.md
+    about: Do not report vulnerabilities in public issues.
