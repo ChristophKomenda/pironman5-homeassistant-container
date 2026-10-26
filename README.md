@@ -44,6 +44,12 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
+## Hardware compatibility and testing
+
+The integration targets **Pironman 5** and **Pironman 5 Max**. The maintainer has tested it on **Pironman 5 Max** with Home Assistant Container. Compatibility with **Pironman Mini**, **Pironman Pro Max**, and other variants has **not** been verified; no support is claimed for those models at this time.
+
+For a model-by-model compatibility matrix, reproducible test checklist, and instructions for submitting hardware test results, see [Hardware compatibility and testing](docs/hardware-testing.md).
+
 ## Why use it?
 
 - **Local by design:** No external account, cloud service, or MQTT broker.
