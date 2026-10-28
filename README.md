@@ -40,7 +40,7 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 | **Connection** | Local Pironman REST API, default TCP port `34001` |
 | **Installation** | HACS (recommended) or manual |
 | **Deployment** | Same Raspberry Pi or a separate LAN host |
-| **Latest published release** | `1.2.0` |
+| **Latest release** | `1.3.0` |
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
@@ -68,6 +68,26 @@ For a model-by-model matrix, reproducible test checklist, and instructions for s
 - **Control:** Fan profiles, RGB lighting, and OLED display settings.
 - **Flexible:** Configure API host, port, and polling interval without reinstalling.
 
+## Dynamic storage discovery (v1.3.0)
+
+Storage sensors are automatically discovered from the Pironman REST API.
+
+- Detects supported NVMe (`/dev/nvmeXnY`) and USB/SATA (`/dev/sdX`) devices.
+- Creates sensors for newly detected drives during coordinator updates.
+- Supports USB hot-plug without restarting Home Assistant.
+- Marks removed drives as unavailable while retaining their entity registry entries.
+- Preserves existing NVMe sensor unique IDs for backward compatibility.
+- Ignores empty device placeholders and partition entries.
+
+**Device identity limitation:** Storage sensors currently use Linux device
+names, not persistent hardware identifiers. After reconnecting a USB drive,
+Linux may assign a different `/dev/sdX` name. A sensor can therefore refer
+to a different physical drive after device reassignment. Automations should
+not assume that `/dev/sdX` permanently identifies one physical disk.
+
+Verified on a Pironman 5 Max using Pironman API 1.3.20 and
+Home Assistant Container. Other hardware variants require additional testing.
+
 ## Features
 
 ### System monitoring
@@ -77,7 +97,7 @@ For a model-by-model matrix, reproducible test checklist, and instructions for s
 | CPU | Temperature, usage, frequency |
 | GPU | Temperature |
 | Memory | Usage percentage and used memory |
-| Storage | NVMe 0 and NVMe 1 usage |
+| Storage | Dynamically discovered NVMe and USB disk usage |
 | Network | Download and upload speed |
 | Cooling | Fan speed and running status |
 
