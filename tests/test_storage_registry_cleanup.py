@@ -83,7 +83,7 @@ def test_approved_missing_device():
         {"sda"},
         allowed={"sda"},
         enabled=True,
-    ) == {"sda": "sensor.test_sda"}
+    ) == {"sda": ["sensor.test_sda"]}
 
 
 def test_present_device_protected():

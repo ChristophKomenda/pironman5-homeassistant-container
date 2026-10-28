@@ -125,6 +125,7 @@ async def test_removes_approved_missing_sensor(cleanup_env):
     removed = await cleanup(
         None, "abc", {"sda"}, set(), {"sda"},
         enabled=True,
+        is_device_present=lambda device: False,
     )
 
     assert removed == {"sda"}
@@ -139,6 +140,7 @@ async def test_reconnected_device_is_not_removed(cleanup_env):
     removed = await cleanup(
         None, "abc", {"sda"}, {"sda"}, {"sda"},
         enabled=True,
+        is_device_present=lambda device: False,
     )
 
     assert removed == set()
@@ -154,6 +156,7 @@ async def test_registry_error_does_not_report_success(cleanup_env):
     removed = await cleanup(
         None, "abc", {"sda"}, set(), {"sda"},
         enabled=True,
+        is_device_present=lambda device: False,
     )
 
     assert removed == set()
@@ -180,6 +183,7 @@ async def test_no_due_devices_does_nothing(cleanup_env):
     removed = await cleanup(
         None, "abc", set(), set(), {"sda"},
         enabled=True,
+        is_device_present=lambda device: False,
     )
 
     assert removed == set()
@@ -195,6 +199,7 @@ async def test_foreign_config_entry_is_protected(cleanup_env):
     removed = await cleanup(
         None, "abc", {"sda"}, set(), {"sda"},
         enabled=True,
+        is_device_present=lambda device: False,
     )
 
     assert removed == set()
@@ -208,7 +213,79 @@ async def test_unapproved_sensor_is_protected(cleanup_env):
     removed = await cleanup(
         None, "abc", {"sda"}, set(), set(),
         enabled=True,
+        is_device_present=lambda device: False,
     )
 
     assert removed == set()
     assert registry.removed == []
+
+
+@pytest.mark.asyncio
+async def test_missing_live_checker_prevents_deletion(cleanup_env):
+    cleanup, registry = cleanup_env([entity("sda")])
+
+    removed = await cleanup(
+        None, "abc", {"sda"}, set(), {"sda"},
+        enabled=True,
+    )
+
+    assert removed == set()
+    assert registry.removed == []
+
+
+@pytest.mark.asyncio
+async def test_multiple_entities_removed_for_one_device(cleanup_env):
+    first = entity("sda")
+    second = SimpleNamespace(
+        entity_id="sensor.test_sda_temperature",
+        domain="sensor",
+        platform="pironman5",
+        config_entry_id="abc",
+        unique_id="abc_storage_sda_usage",
+    )
+
+    # The fake registry uses entity IDs as keys.
+    cleanup, registry = cleanup_env([first, second])
+
+    removed = await cleanup(
+        None, "abc", {"sda"}, set(), {"sda"},
+        enabled=True,
+        is_device_present=lambda device: False,
+    )
+
+    assert removed == {"sda"}
+    assert set(registry.removed) == {
+        "sensor.test_sda",
+        "sensor.test_sda_temperature",
+    }
+
+
+@pytest.mark.asyncio
+async def test_reconnect_during_cleanup_stops_remaining_removals(
+    cleanup_env,
+):
+    first = entity("sda")
+    second = SimpleNamespace(
+        entity_id="sensor.test_sda_second",
+        domain="sensor",
+        platform="pironman5",
+        config_entry_id="abc",
+        unique_id="abc_storage_sda_usage",
+    )
+
+    cleanup, registry = cleanup_env([first, second])
+    checks = 0
+
+    def presence(device):
+        nonlocal checks
+        checks += 1
+        return checks >= 2
+
+    removed = await cleanup(
+        None, "abc", {"sda"}, set(), {"sda"},
+        enabled=True,
+        is_device_present=presence,
+    )
+
+    assert removed == set()
+    assert len(registry.removed) == 1

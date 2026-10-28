@@ -17,7 +17,7 @@ def eligible_storage_entities(
     allowed_devices: set[str],
     *,
     enabled: bool = False,
-) -> dict[str, str]:
+) -> dict[str, list[str]]:
     """Return device-to-entity mappings eligible for removal."""
     if not enabled:
         return {}
@@ -54,7 +54,7 @@ def eligible_storage_entities(
         if not device.startswith("sd"):
             continue
 
-        result[device] = entity.entity_id
+        result.setdefault(device, []).append(entity.entity_id)
 
     return result
 
@@ -67,6 +67,7 @@ async def async_cleanup_storage_registry(
     allowed_devices: set[str],
     *,
     enabled: bool = False,
+    is_device_present=None,
 ) -> set[str]:
     """Remove approved registry entries; return successful devices."""
     if not enabled or not due_devices:
@@ -88,23 +89,47 @@ async def async_cleanup_storage_registry(
 
     removed = set()
 
-    for device, entity_id in candidates.items():
-        try:
-            # Recheck the entity immediately before removal.
-            entity = registry.async_get(entity_id)
-            if entity is None:
-                continue
+    for device, entity_ids in candidates.items():
+        # A live presence check is mandatory before deleting entities.
+        # Without it, fail closed.
+        if is_device_present is None:
+            continue
 
-            if entity.config_entry_id != entry_id:
-                continue
+        all_removed = True
 
-            registry.async_remove(entity_id)
+        for entity_id in entity_ids:
+            try:
+                if is_device_present(device):
+                    all_removed = False
+                    break
+
+                entity = registry.async_get(entity_id)
+                if entity is None:
+                    all_removed = False
+                    continue
+
+                if (
+                    entity.config_entry_id != entry_id
+                    or entity.platform != "pironman5"
+                    or entity.domain != "sensor"
+                    or not entity.unique_id.startswith(f"{entry_id}_")
+                    or storage_key_for_unique_suffix(
+                        entity.unique_id[len(entry_id) + 1:]
+                    ) != device
+                ):
+                    all_removed = False
+                    continue
+
+                registry.async_remove(entity_id)
+
+            except Exception:
+                all_removed = False
+                _LOGGER.exception(
+                    "Unable to remove stale storage sensor %s",
+                    entity_id,
+                )
+
+        if all_removed:
             removed.add(device)
-
-        except Exception:
-            _LOGGER.exception(
-                "Unable to remove stale storage sensor %s",
-                entity_id,
-            )
 
     return removed
