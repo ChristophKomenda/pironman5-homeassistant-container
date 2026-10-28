@@ -8,12 +8,13 @@ _STORAGE_TOTAL = re.compile(
 
 
 def storage_snapshot_status(data, registered_devices):
-    """Return present and explicitly absent devices.
+    """Classify storage devices conservatively.
 
-    A missing API field is never evidence that a device was removed.
+    Positive capacity confirms presence.
+    None, zero, missing fields, and invalid values are unknown.
 
-    Explicit absence requires a reported total of None or zero.
-    Invalid values are ignored.
+    The current API does not provide reliable evidence of physical
+    device removal, so explicit absence is never reported.
     """
     if not isinstance(data, dict):
         return set(), set()
@@ -43,11 +44,10 @@ def storage_snapshot_status(data, registered_devices):
         if total is not None and total > 0
     }
 
-    absent = {
-        device
-        for device in registered_devices
-        if device in totals
-        and (totals[device] is None or totals[device] == 0)
-    }
+    # None and zero are ambiguous API values, not proof
+    # of physical USB device removal.
+    # Until stable device identification is available,
+    # never report an explicitly absent device.
+    absent = set()
 
     return present, absent

@@ -27,13 +27,13 @@ def test_present_device():
     assert absent == set()
 
 
-def test_explicitly_absent_device():
+def test_none_total_is_unknown():
     present, absent = check(
         {"disk_/dev/sda_total": None},
         {"sda"},
     )
     assert present == set()
-    assert absent == {"sda"}
+    assert absent == set()
 
 
 def test_missing_field_not_absent():
@@ -56,15 +56,15 @@ def test_invalid_total_not_absent():
     ) == (set(), set())
 
 
-def test_zero_total_means_explicit_absence():
+def test_zero_total_is_unknown():
     assert check(
         {"disk_/dev/sda_total": 0},
         {"sda"},
-    ) == (set(), {"sda"})
+    ) == (set(), set())
 
 
-def test_nvme_can_be_identified_but_not_deleted_here():
+def test_nvme_none_total_is_unknown():
     assert check(
         {"disk_/dev/nvme0n1_total": None},
         {"nvme0n1"},
-    ) == (set(), {"nvme0n1"})
+    ) == (set(), set())
