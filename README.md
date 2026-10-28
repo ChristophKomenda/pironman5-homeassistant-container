@@ -40,7 +40,7 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 | **Connection** | Local Pironman REST API, default TCP port `34001` |
 | **Installation** | HACS (recommended) or manual |
 | **Deployment** | Same Raspberry Pi or a separate LAN host |
-| **Latest published release** | `1.1.5` |
+| **Latest published release** | `1.2.0` |
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
@@ -290,7 +290,7 @@ Save the options and allow the integration to reload. If needed, restart Home As
 
 ## Releases
 
-### v1.2.0 — Multi-model support (in development)
+### v1.2.0 — Multi-model support (released October 28, 2026)
 
 - Added automatic Pironman model detection using the local REST API.
 - Added manual model selection as a fallback.
@@ -299,7 +299,7 @@ Save the options and allow the integration to reload. If needed, restart Home As
 - Preserved existing entity unique IDs and compatibility behavior for APIs without capability metadata.
 - Verified startup and model/peripheral detection on Pironman 5 Max with Home Assistant Container 2026.10.1 and Pironman API 1.3.20.
 
-**Release status:** Not yet tagged or published. Other models require real-hardware validation; passing a startup test on Pironman 5 Max does not verify all control operations or other models.
+**Release status:** Published via GitHub Releases. Other models require real-hardware validation; passing a startup test on Pironman 5 Max does not verify all control operations or other models.
 
 ### v1.1.3 — HACS maintenance release
 
