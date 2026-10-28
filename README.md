@@ -64,7 +64,7 @@ For a model-by-model matrix, reproducible test checklist, and instructions for s
 - **Local by design:** No external account, cloud service, or MQTT broker.
 - **Official HACS distribution:** Discover, install, and update from HACS.
 - **Container-friendly:** Supports Home Assistant Container, including remote Raspberry Pi deployments.
-- **Monitoring:** CPU, GPU, memory, NVMe storage, network traffic, and cooling.
+- **Monitoring:** CPU, GPU, memory, dynamically discovered NVMe and USB storage, network traffic, and cooling.
 - **Control:** Fan profiles, RGB lighting, and OLED display settings.
 - **Flexible:** Configure API host, port, and polling interval without reinstalling.
 
@@ -103,14 +103,14 @@ Home Assistant Container. Other hardware variants require additional testing.
 
 Sensor availability depends on the hardware and data provided by the installed Pironman software.
 
-#### Dual NVMe monitoring
+#### NVMe and USB storage monitoring
 
 | Drive | Expected device path |
 |---|---|
 | NVMe 0 | `/dev/nvme0n1` |
 | NVMe 1 | `/dev/nvme1n1` |
 
-The original NVMe sensor retains its existing unique ID for compatibility. Device paths are currently fixed; automatic drive discovery is a possible future improvement.
+Existing NVMe sensors retain their legacy unique IDs for compatibility. Additional NVMe and USB storage devices are dynamically discovered from the local Pironman API. Storage sensor identities currently follow Linux device paths, which may change after reconnection.
 
 ### Fan control
 
@@ -310,6 +310,17 @@ Save the options and allow the integration to reload. If needed, restart Home As
 
 ## Releases
 
+### v1.3.0 — Dynamic Storage Discovery & Hot-Plug Support
+
+- Added automatic NVMe and USB storage discovery.
+- Added hot-plug detection without restarting Home Assistant.
+- Added availability handling for disconnected storage devices.
+- Preserved existing NVMe entity unique IDs.
+- Centralized storage detection in the coordinator.
+- Added nine regression tests.
+- Verified dynamic storage discovery on Pironman 5 Max with Home Assistant Container 2026.10.1 and Pironman API 1.3.20.
+- Documented Linux device-name reassignment limitations.
+
 ### v1.2.0 — Multi-model support (released October 28, 2026)
 
 - Added automatic Pironman model detection using the local REST API.
@@ -360,7 +371,7 @@ See [all GitHub releases](https://github.com/ChristophKomenda/pironman5-homeassi
 
 Potential future improvements (not release commitments):
 
-- Automatic NVMe and USB storage discovery
+- Persistent physical storage identification (serial number / WWN, subject to upstream API support)
 - Additional hardware monitoring and diagnostics
 - Persistent storage of the previous OLED timeout
 - More dashboard and automation examples
