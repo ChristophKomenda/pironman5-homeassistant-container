@@ -1,5 +1,10 @@
 # Hardware compatibility and testing
 
+> **Current release:** [v1.2.0 — Multi-Model Support & Automatic Hardware Detection](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases/tag/v1.2.0)
+>
+> Published October 28, 2026. This document distinguishes implemented model support from functionality verified on physical hardware.
+
+
 This document tracks **verified hardware configurations** and provides a reproducible test plan for the community. It is not a promise of compatibility with untested Pironman variants.
 
 ## Compatibility matrix
@@ -76,6 +81,23 @@ A second physical Pironman setup would allow independent validation without dist
 7. **Configuration:** Change host, port and polling interval; verify clean reload and recovery.
 8. **Stability:** Observe repeated polling and normal Home Assistant restarts; record errors and unexpected behavior.
 9. **Evidence:** Publish a redacted test report and screenshots; update the compatibility matrix only after verification.
+
+## Verification scope for v1.2.0
+
+The following checks have been completed on the maintainer's Pironman 5 Max setup:
+
+- Successful Home Assistant integration startup.
+- Automatic detection of the Pironman 5 Max model.
+- Retrieval and interpretation of API-reported hardware capabilities.
+- Successful Home Assistant operation without reported startup errors.
+
+**Verification limitations:**
+
+- Individual OLED, RGB and fan control operations have not all been independently revalidated for v1.2.0.
+- Pironman 5, Pironman 5 Mini and Pironman 5 Pro Max still require physical hardware testing.
+- Manual model selection does not guarantee the availability of model-specific hardware controls.
+
+This section should be updated as additional test results become available.
 
 ## Contributing test results
 
