@@ -165,9 +165,17 @@ class PironmanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if device is not None:
                 registered.add(device)
 
+        from .storage_snapshot import storage_snapshot_status
+
+        present, absent = storage_snapshot_status(
+            data,
+            registered,
+        )
+
         return await self.storage_cleanup.async_observe(
             registered,
-            set(self.storage_devices),
+            present,
+            absent_devices=absent,
         )
 
     async def post(self, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:

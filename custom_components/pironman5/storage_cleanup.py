@@ -60,6 +60,7 @@ class StorageCleanupTracker:
         *,
         now: datetime | None = None,
         snapshot_valid: bool = True,
+        absent_devices: set[str] | None = None,
     ) -> set[str]:
         """Update absence state and return paths eligible for cleanup.
 
@@ -83,14 +84,25 @@ class StorageCleanupTracker:
             if is_usb_candidate(device)
         }
 
+        # Fail closed: an unspecified absence set must never
+        # be interpreted as evidence of device removal.
+        absent = {
+            device for device in (absent_devices or set())
+            if is_usb_candidate(device)
+            and device in registered
+            and device not in present
+        }
+
         changed = False
 
+        # A confirmed reconnection cancels the countdown.
+        # Unknown API states preserve existing timestamps.
         for device in tuple(self._missing):
-            if device in present or device not in registered:
+            if device in present:
                 del self._missing[device]
                 changed = True
 
-        for device in registered - present:
+        for device in absent:
             if device not in self._missing:
                 self._missing[device] = now
                 changed = True
@@ -106,8 +118,7 @@ class StorageCleanupTracker:
         return {
             device
             for device, timestamp in self._missing.items()
-            if device in registered
-            and device not in present
+            if device in absent
             and now - timestamp >= CLEANUP_AFTER
         }
 

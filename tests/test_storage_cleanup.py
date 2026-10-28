@@ -62,7 +62,7 @@ async def test_missing_device_starts_timer():
     tracker = Tracker(None, "test")
     await tracker.async_load()
 
-    due = await tracker.async_observe({"sda"}, set(), now=START)
+    due = await tracker.async_observe({"sda"}, set(), now=START, absent_devices={"sda"})
 
     assert due == set()
     assert "sda" in tracker._missing
@@ -82,11 +82,11 @@ async def test_not_due_before_24_hours():
 @pytest.mark.asyncio
 async def test_due_after_24_hours():
     tracker = Tracker(None, "test")
-    await tracker.async_observe({"sda"}, set(), now=START)
+    await tracker.async_observe({"sda"}, set(), now=START, absent_devices={"sda"})
 
     due = await tracker.async_observe(
         {"sda"}, set(), now=START + timedelta(hours=24)
-    )
+    , absent_devices={"sda"})
     assert due == {"sda"}
 
 
@@ -105,14 +105,14 @@ async def test_reconnect_cancels_cleanup():
 @pytest.mark.asyncio
 async def test_restart_preserves_timestamp():
     first = Tracker(None, "test")
-    await first.async_observe({"sda"}, set(), now=START)
+    await first.async_observe({"sda"}, set(), now=START, absent_devices={"sda"})
 
     restarted = Tracker(None, "test")
     await restarted.async_load()
 
     due = await restarted.async_observe(
         {"sda"}, set(), now=START + timedelta(hours=25)
-    )
+    , absent_devices={"sda"})
     assert due == {"sda"}
 
 
