@@ -4,15 +4,15 @@ This document tracks **verified hardware configurations** and provides a reprodu
 
 ## Compatibility matrix
 
-| Hardware | Integration support | Verification status | Notes |
+| Hardware | Implementation | Verification status | Notes |
 | --- | --- | --- | --- |
-| SunFounder Pironman 5 Max | Supported | Maintainer-tested | Raspberry Pi 5, Home Assistant Container; features depend on the installed Pironman software/API. |
-| SunFounder Pironman 5 | Targeted | Not maintainer-tested | Uses the Pironman software's local REST API. Please report the exact hardware/software combination if you test it. |
-| SunFounder Pironman Mini | Not confirmed | Not tested | API availability and compatibility must be checked before support can be claimed. |
-| SunFounder Pironman Pro Max | Not confirmed | Not tested | API availability and compatibility must be checked before support can be claimed. |
+| SunFounder Pironman 5 Max | Model detection and capability-aware entities implemented | **Maintainer-tested** | Home Assistant Container 2026.10.1; Pironman API 1.3.20; successful startup and capability checks. Individual controls have not all been revalidated as part of v1.2.0. |
+| SunFounder Pironman 5 | Model detection and capability-aware entities implemented | Not tested for v1.2.0 | Real-hardware verification needed. |
+| SunFounder Pironman 5 Mini | Model detection and capability-aware entities implemented | Not tested | API and available controls must be verified on real hardware. |
+| SunFounder Pironman 5 Pro Max | Model detection and capability-aware entities implemented | Not tested | API and available controls must be verified on real hardware. |
 | Other Pironman variants | Not confirmed | Not tested | No compatibility claims without evidence. |
 
-**Important:** “Supported” describes the intended integration target. “Maintainer-tested” means the maintainer has used that hardware configuration directly. The presence of a compatible REST endpoint alone does not guarantee feature parity.
+**Important:** An implemented model selector is not the same as verified hardware compatibility. Capability-aware setup uses the `peripherals` list from `/get-device-info` when available. Missing capability metadata triggers legacy behavior, not a guarantee that every entity is supported. Manual selection does not add missing hardware capabilities.
 
 ## Known deployment scenarios
 
@@ -35,6 +35,9 @@ Copy this section into a GitHub issue or pull request when reporting compatibili
 
 ```text
 Pironman model:
+Automatic model detection (model key / source):
+Manual override tested? (yes/no):
+Reported peripherals (redact identifying details):
 Raspberry Pi model:
 Operating system and version:
 Pironman software version:
@@ -45,6 +48,9 @@ API endpoint reachable from Home Assistant? (yes/no):
 API port (default 34001):
 
 Installation and configuration: PASS / FAIL / NOT TESTED
+Automatic detection and model sensor: PASS / FAIL / NOT TESTED
+Manual model override and reload: PASS / FAIL / NOT TESTED
+Capability-aware entity visibility: PASS / FAIL / NOT TESTED
 CPU / GPU / memory sensors: PASS / FAIL / NOT TESTED
 NVMe sensors (state number of installed drives): PASS / FAIL / NOT TESTED
 Network sensors: PASS / FAIL / NOT TESTED

@@ -1,6 +1,6 @@
-# Pironman 5 / 5 Max — Home Assistant Integration
+# Pironman 5 Family — Home Assistant Integration
 
-**Monitor and control your SunFounder Pironman 5 or Pironman 5 Max directly from Home Assistant.**
+**Monitor and control compatible SunFounder Pironman 5 family hardware directly from Home Assistant.**
 
 A fully local custom integration for **Home Assistant Container**, Home Assistant OS and other supported Home Assistant installations. Works with the Pironman software's local REST API, including setups where Home Assistant runs on a different machine.
 
@@ -35,20 +35,29 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 
 | | |
 |---|---|
-| **Hardware** | SunFounder Pironman 5 / Pironman 5 Max |
+| **Hardware** | Pironman 5 family (see verification matrix below) |
 | **Home Assistant** | 2024.1.0 or newer |
 | **Connection** | Local Pironman REST API, default TCP port `34001` |
 | **Installation** | HACS (recommended) or manual |
 | **Deployment** | Same Raspberry Pi or a separate LAN host |
-| **Integration version documented** | `1.1.3` |
+| **Latest published release** | `1.1.5` |
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
 ## Hardware compatibility and testing
 
-The integration targets **Pironman 5** and **Pironman 5 Max**. The maintainer has tested it on **Pironman 5 Max** with Home Assistant Container. Compatibility with **Pironman Mini**, **Pironman Pro Max**, and other variants has **not** been verified; no support is claimed for those models at this time.
+The integration includes **automatic model detection**, a **manual model override**, and **capability-aware entity setup** for the Pironman 5 family. The integration reads the model ID and supported peripherals from the local SunFounder REST API when available. If the API does not provide a peripheral list, it retains the previous entity setup behavior for backward compatibility.
 
-For a model-by-model compatibility matrix, reproducible test checklist, and instructions for submitting hardware test results, see [Hardware compatibility and testing](docs/hardware-testing.md).
+| Hardware | Integration status | Hardware verification |
+|---|---|---|
+| SunFounder Pironman 5 Max | Implemented | **Maintainer-tested** with Home Assistant Container 2026.10.1 and Pironman API 1.3.20 |
+| SunFounder Pironman 5 | Model detection and capability handling implemented | Not verified on this hardware |
+| SunFounder Pironman 5 Mini | Model detection and capability handling implemented | Not verified on this hardware |
+| SunFounder Pironman 5 Pro Max | Model detection and capability handling implemented | Not verified on this hardware |
+
+**Important:** Implemented model recognition does **not** establish full compatibility. The Mini and Pro Max may expose different API endpoints and hardware controls. Real-device testing is still required before claiming verified support.
+
+For a model-by-model matrix, reproducible test checklist, and instructions for submitting hardware results, see [Hardware compatibility and testing](docs/hardware-testing.md).
 
 ## Why use it?
 
@@ -173,6 +182,14 @@ For Home Assistant Container, the configuration directory is usually mounted as 
 4. Enter the API port (normally `34001`).
 5. Complete setup and check the created entities.
 
+### Automatic model detection and manual override
+
+The integration attempts to identify the Pironman model using the SunFounder API's `/get-device-info` response. Supported model selections are **Automatic**, **Pironman 5**, **Pironman 5 Mini**, **Pironman 5 Max**, and **Pironman 5 Pro Max**. When automatic detection cannot determine the model, select it manually in the integration options.
+
+The integration also reads the API's `peripherals` list, when provided, to avoid creating controls for hardware that the connected device does not report (for example, OLED controls on a device without OLED). On older API versions without this list, the integration preserves its legacy behavior; some unsupported controls may still be shown.
+
+**Note:** A manual model override changes the model label/selection; it does not emulate missing hardware or force unsupported peripherals to appear. Available entities depend on the actual API capabilities. Existing entity unique IDs remain unchanged.
+
 ### Change connection settings
 
 Navigate to **Settings → Devices & Services → Pironman 5 → Configure**.
@@ -182,6 +199,7 @@ Navigate to **Settings → Devices & Services → Pironman 5 → Configure**.
 | Host / IP | Address of the Raspberry Pi running the API |
 | API port | Default `34001` |
 | Polling interval | Configurable from `5` to `60` seconds |
+| Model | Automatic (recommended) or manual Pironman 5 family selection |
 
 Configuration changes trigger an integration reload. A **10-second** polling interval is a reasonable starting point. Shorter intervals increase API requests; longer intervals reduce polling traffic.
 
@@ -271,6 +289,17 @@ Save the options and allow the integration to reload. If needed, restart Home As
 **Still stuck?** [Open a bug report](https://github.com/ChristophKomenda/pironman5-homeassistant-container/issues/new/choose) and include your integration version, Home Assistant version, Pironman model, installation type, reproduction steps, and **redacted** logs.
 
 ## Releases
+
+### v1.2.0 — Multi-model support (in development)
+
+- Added automatic Pironman model detection using the local REST API.
+- Added manual model selection as a fallback.
+- Added a diagnostic model sensor.
+- Added capability-aware entity setup for OLED, RGB, and fan controls when the API provides a `peripherals` list.
+- Preserved existing entity unique IDs and compatibility behavior for APIs without capability metadata.
+- Verified startup and model/peripheral detection on Pironman 5 Max with Home Assistant Container 2026.10.1 and Pironman API 1.3.20.
+
+**Release status:** Not yet tagged or published. Other models require real-hardware validation; passing a startup test on Pironman 5 Max does not verify all control operations or other models.
 
 ### v1.1.3 — HACS maintenance release
 
