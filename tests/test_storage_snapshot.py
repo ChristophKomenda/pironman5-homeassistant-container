@@ -68,3 +68,33 @@ def test_nvme_none_total_is_unknown():
         {"disk_/dev/nvme0n1_total": None},
         {"nvme0n1"},
     ) == (set(), set())
+
+
+def test_ambiguous_api_values_never_trigger_absence():
+    """Unknown storage values must never trigger cleanup."""
+    registered = {"sda", "sde", "sdf"}
+
+    snapshots = [
+        {
+            "disk_/dev/sda_total": 500_000_000_000,
+            "disk_/dev/sde_total": None,
+            "disk_/dev/sdf_total": None,
+        },
+        {
+            "disk_/dev/sda_total": 500_000_000_000,
+            "disk_/dev/sde_total": 0,
+            "disk_/dev/sdf_total": 0,
+        },
+        {
+            "disk_/dev/sda_total": 500_000_000_000,
+        },
+    ]
+
+    for snapshot in snapshots:
+        present, absent = check(
+            snapshot,
+            registered,
+        )
+
+        assert "sda" in present
+        assert absent == set()
