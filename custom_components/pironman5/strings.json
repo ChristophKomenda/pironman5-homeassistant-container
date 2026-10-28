@@ -6,7 +6,8 @@
         "description": "Configure the connection to the local Pironman REST API.",
         "data": {
           "host": "Host",
-          "port": "Port"
+          "port": "Port",
+          "model": "Pironman model (automatic detection or manual selection)"
         }
       }
     },
@@ -26,7 +27,8 @@
         "data": {
           "host": "Host / IP address",
           "port": "Port",
-          "scan_interval": "Update interval (seconds)"
+          "scan_interval": "Update interval (seconds)",
+          "model": "Pironman model (automatic detection or manual selection)"
         }
       }
     },

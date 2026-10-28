@@ -46,30 +46,24 @@ async def async_setup_entry(
 ):
     coordinator = entry.runtime_data
 
-    async_add_entities(
-        [
-            PironmanFanMode(
-                coordinator,
-                entry.entry_id,
-            ),
-            PironmanGPIOFanLED(
-                coordinator,
-                entry.entry_id,
-            ),
-            PironmanRGBEffect(
-                coordinator,
-                entry.entry_id,
-            ),
-            PironmanOLEDRotation(
-                coordinator,
-                entry.entry_id,
-            ),
-            PironmanOLEDPage(
-                coordinator,
-                entry.entry_id,
-            ),
-        ]
-    )
+    entities = []
+
+    if coordinator.supports("gpio_fan_mode"):
+        entities.append(PironmanFanMode(coordinator, entry.entry_id))
+
+    if coordinator.supports("gpio_fan_led"):
+        entities.append(PironmanGPIOFanLED(coordinator, entry.entry_id))
+
+    if coordinator.supports("ws2812"):
+        entities.append(PironmanRGBEffect(coordinator, entry.entry_id))
+
+    if coordinator.supports("oled"):
+        entities.extend([
+            PironmanOLEDRotation(coordinator, entry.entry_id),
+            PironmanOLEDPage(coordinator, entry.entry_id),
+        ])
+
+    async_add_entities(entities)
 
 
 class PironmanFanMode(PironmanEntity, SelectEntity):

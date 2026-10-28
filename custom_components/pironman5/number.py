@@ -14,18 +14,17 @@ async def async_setup_entry(
 ):
     coordinator = entry.runtime_data
 
-    async_add_entities(
-        [
-            PironmanRGBSpeed(
-                coordinator,
-                entry.entry_id,
-            ),
-            PironmanOLEDSleepTimeout(
-                coordinator,
-                entry.entry_id,
-            ),
-        ]
-    )
+    entities = []
+
+    if coordinator.supports("ws2812"):
+        entities.append(PironmanRGBSpeed(coordinator, entry.entry_id))
+
+    if coordinator.supports("oled"):
+        entities.append(
+            PironmanOLEDSleepTimeout(coordinator, entry.entry_id)
+        )
+
+    async_add_entities(entities)
 
 
 class PironmanRGBSpeed(PironmanEntity, NumberEntity):

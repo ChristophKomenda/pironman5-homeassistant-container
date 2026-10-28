@@ -8,12 +8,11 @@ from .oled import PironmanOLED
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = entry.runtime_data
-    async_add_entities(
-        [
+    if coordinator.supports("oled"):
+        async_add_entities([
             PironmanOLEDEnabledSwitch(coordinator, entry.entry_id),
             PironmanOLEDAlwaysOnSwitch(coordinator, entry.entry_id),
-        ]
-    )
+        ])
 
 
 class PironmanOLEDEnabledSwitch(PironmanEntity, SwitchEntity):

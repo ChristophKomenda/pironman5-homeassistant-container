@@ -13,14 +13,10 @@ async def async_setup_entry(
 ):
     coordinator = entry.runtime_data
 
-    async_add_entities(
-        [
-            PironmanFanState(
-                coordinator,
-                entry.entry_id,
-            )
-        ]
-    )
+    if coordinator.supports("gpio_fan_state"):
+        async_add_entities([
+            PironmanFanState(coordinator, entry.entry_id)
+        ])
 
 
 class PironmanFanState(PironmanEntity, BinarySensorEntity):

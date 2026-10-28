@@ -106,6 +106,11 @@ async def async_setup_entry(
     entities = []
 
     for key, name, device_class, unit, data_key in SENSORS:
+        if key == "fan_speed" and not coordinator.supports(
+            "pwm_fan_speed"
+        ):
+            continue
+
         entities.append(
             PironmanSensor(
                 coordinator,
@@ -118,6 +123,7 @@ async def async_setup_entry(
             )
         )
 
+    entities.append(PironmanModelSensor(coordinator, entry.entry_id))
     async_add_entities(entities)
 
 
@@ -145,3 +151,26 @@ class PironmanSensor(PironmanEntity, SensorEntity):
     def native_value(self):
         return (self.coordinator.data or {}).get(self._data_key)
 
+
+
+class PironmanModelSensor(PironmanEntity, SensorEntity):
+    """Model and detection method (unknown when vendor metadata is insufficient)."""
+    _attr_name = "Model"
+    _attr_icon = "mdi:raspberry-pi"
+    _attr_has_entity_name = True
+
+    def __init__(self, coordinator, entry_id):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry_id}_model"
+
+    @property
+    def native_value(self):
+        from .models import MODEL_NAMES
+        return MODEL_NAMES.get(self.coordinator.model_key, "Unknown")
+
+    @property
+    def extra_state_attributes(self):
+        return {
+            "model_key": self.coordinator.model_key,
+            "detection_source": self.coordinator.model_source,
+        }

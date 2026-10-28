@@ -24,14 +24,10 @@ async def async_setup_entry(
 ):
     coordinator = entry.runtime_data
 
-    async_add_entities(
-        [
-            PironmanRGBLight(
-                coordinator,
-                entry.entry_id,
-            )
-        ]
-    )
+    if coordinator.supports("ws2812"):
+        async_add_entities([
+            PironmanRGBLight(coordinator, entry.entry_id)
+        ])
 
 
 class PironmanRGBLight(PironmanEntity, LightEntity):

@@ -12,6 +12,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .const import API_PATH, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .models import AUTO, CONF_MODEL, MODEL_NAMES, resolve_model
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +36,12 @@ class PironmanCoordinator(
         self.session = async_get_clientsession(hass)
 
         self.device_info_data: dict[str, Any] = {}
+        self.peripherals: frozenset[str] | None = None
+        self.model_key: str | None = None
+        self.model_source = "unknown"
+        self._model_selection = config_entry.options.get(
+            CONF_MODEL, config_entry.data.get(CONF_MODEL, AUTO)
+        )
 
         super().__init__(
             hass,
@@ -55,10 +62,7 @@ class PironmanCoordinator(
         """Return device information."""
         info = self.device_info_data
 
-        name = info.get(
-            "name",
-            "Pironman 5",
-        )
+        name = MODEL_NAMES.get(self.model_key) or info.get("name", "Pironman 5")
 
         return DeviceInfo(
             identifiers={(DOMAIN, self.host)},
@@ -86,17 +90,44 @@ class PironmanCoordinator(
                     "for get-device-info"
                 )
 
-            self.device_info_data = result.get(
-                "data",
-                {},
-            )
+            raw_data = result.get("data")
+            if not isinstance(raw_data, dict):
+                raise UpdateFailed("Invalid get-device-info data")
+            self.device_info_data = raw_data
 
+            peripherals = raw_data.get("peripherals")
+            if isinstance(peripherals, list) and all(
+                isinstance(item, str) for item in peripherals
+            ):
+                self.peripherals = frozenset(peripherals)
+            else:
+                self.peripherals = None
+
+            self.model_key, self.model_source = resolve_model(
+                raw_data, self._model_selection
+            )
+            if self.model_key is None:
+                _LOGGER.warning(
+                    "Pironman model could not be determined from API metadata; "
+                    "select the model manually in integration options"
+                )
             return self.device_info_data
 
         except Exception as err:
             raise UpdateFailed(
                 f"Unable to get Pironman device information: {err}"
             ) from err
+
+    def supports(self, peripheral: str) -> bool:
+        """Check whether the connected device supports a peripheral.
+
+        If the API does not expose capabilities, preserve the
+        existing integration behavior for backward compatibility.
+        """
+        if self.peripherals is None:
+            return True
+
+        return peripheral in self.peripherals
 
     async def _async_update_data(
         self,
