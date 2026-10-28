@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.3.1] - 2026-10-28
+
+### Added
+- Persistent storage absence tracking infrastructure with a 24-hour threshold.
+- Non-destructive storage cleanup dry-run logging.
+- Guarded entity registry cleanup utilities with deletion disabled by default.
+- Automated regression tests for tracking, registry safety, and lifecycle handling.
+
+### Changed
+- Treat ambiguous storage API values (`None`, `0`, or missing data) as unknown.
+- Improve storage tracking task serialization and integration unload handling.
+
+### Safety
+- Automatic entity removal remains disabled.
+- Physical drive removal cannot yet be reliably confirmed through the current API.
+- Existing entity unique IDs remain unchanged.
+
 ## [1.3.0] - 2026-10-28
 
 ### Added
