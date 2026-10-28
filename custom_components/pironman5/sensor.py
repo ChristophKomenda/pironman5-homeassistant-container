@@ -139,28 +139,44 @@ async def async_setup_entry(hass, entry, async_add_entities):
     discover()
     entry.async_on_unload(coordinator.async_add_listener(discover))
 
+    import asyncio
+    import logging
+
+    logger = logging.getLogger(__name__)
     tracking_task = None
+    tracking_stopped = False
 
     async def track_storage():
-        """Track missing storage devices after successful API updates."""
-        await coordinator.async_track_storage_absence()
+        """Safely update persistent storage absence tracking."""
+        try:
+            await coordinator.async_track_storage_absence()
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("Pironman storage absence tracking failed")
 
     def schedule_storage_tracking():
         nonlocal tracking_task
 
-        if not coordinator.last_update_success:
+        if tracking_stopped or not coordinator.last_update_success:
             return
 
         if tracking_task is not None and not tracking_task.done():
             return
 
-        tracking_task = hass.async_create_task(
-            track_storage()
-        )
+        tracking_task = hass.async_create_task(track_storage())
+
+    def stop_storage_tracking():
+        nonlocal tracking_stopped
+        tracking_stopped = True
+
+        if tracking_task is not None and not tracking_task.done():
+            tracking_task.cancel()
 
     entry.async_on_unload(
         coordinator.async_add_listener(schedule_storage_tracking)
     )
+    entry.async_on_unload(stop_storage_tracking)
 
     schedule_storage_tracking()
 

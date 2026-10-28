@@ -130,11 +130,22 @@ class PironmanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(f"Unable to communicate with Pironman API: {err}") from err
 
     async def async_track_storage_absence(self) -> set[str]:
-        """Track missing registered storage sensors after a successful refresh."""
+        """Track missing registered storage sensors after a valid refresh."""
         from homeassistant.helpers import entity_registry as er
         from .sensor import storage_key_for_unique_suffix
 
         if not self.last_update_success or not self.supports("storage"):
+            return set()
+
+        data = self.data
+        if not isinstance(data, dict):
+            return set()
+
+        # Never interpret an incomplete API response as disk removal.
+        if not any(
+            isinstance(key, str) and key.startswith("disk_/dev/")
+            for key in data
+        ):
             return set()
 
         registry = er.async_get(self.hass)
