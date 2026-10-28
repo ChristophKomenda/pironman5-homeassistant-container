@@ -139,6 +139,80 @@ async def async_setup_entry(hass, entry, async_add_entities):
     discover()
     entry.async_on_unload(coordinator.async_add_listener(discover))
 
+    import asyncio
+    import logging
+
+    logger = logging.getLogger(__name__)
+    tracking_task = None
+    tracking_stopped = False
+    tracking_pending = False
+    reported_due_devices = set()
+
+    async def track_storage():
+        """Process pending storage updates without overlapping tracker writes."""
+        nonlocal tracking_pending
+
+        try:
+            while tracking_pending and not tracking_stopped:
+                tracking_pending = False
+
+                try:
+                    due_devices = await coordinator.async_track_storage_absence()
+
+                    if tracking_stopped:
+                        return
+
+                    newly_due = due_devices - reported_due_devices
+
+                    for device in sorted(newly_due):
+                        logger.warning(
+                            "Pironman storage cleanup dry-run: "
+                            "device %s has reached the 24-hour absence threshold; "
+                            "registry entities remain untouched",
+                            device,
+                        )
+
+                    reported_due_devices.clear()
+                    reported_due_devices.update(due_devices)
+
+                except asyncio.CancelledError:
+                    raise
+                except Exception:
+                    logger.exception(
+                        "Pironman storage absence tracking failed"
+                    )
+
+        except asyncio.CancelledError:
+            raise
+
+    def schedule_storage_tracking():
+        nonlocal tracking_task, tracking_pending
+
+        if tracking_stopped or not coordinator.last_update_success:
+            return
+
+        tracking_pending = True
+
+        if tracking_task is not None and not tracking_task.done():
+            return
+
+        tracking_task = hass.async_create_task(track_storage())
+
+    def stop_storage_tracking():
+        nonlocal tracking_stopped, tracking_pending
+        tracking_stopped = True
+        tracking_pending = False
+
+        if tracking_task is not None and not tracking_task.done():
+            tracking_task.cancel()
+
+    entry.async_on_unload(
+        coordinator.async_add_listener(schedule_storage_tracking)
+    )
+    entry.async_on_unload(stop_storage_tracking)
+
+    schedule_storage_tracking()
+
 
 class PironmanSensor(PironmanEntity, SensorEntity):
     """Expose a sensor backed by the coordinator's current API data."""

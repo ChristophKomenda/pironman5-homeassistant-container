@@ -32,6 +32,7 @@ async def async_setup_entry(
     from .const import DEFAULT_SCAN_INTERVAL
     coordinator.update_interval = timedelta(seconds=entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL))
     entry.async_on_unload(entry.add_update_listener(async_update_options))
+    await coordinator.storage_cleanup.async_load()
     await coordinator.async_config_entry_first_refresh()
 
     entry.runtime_data = coordinator
