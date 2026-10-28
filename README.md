@@ -40,7 +40,7 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 | **Connection** | Local Pironman REST API, default TCP port `34001` |
 | **Installation** | HACS (recommended) or manual |
 | **Deployment** | Same Raspberry Pi or a separate LAN host |
-| **Latest release** | `1.3.0` |
+| **Latest release** | `1.3.1` |
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
@@ -87,6 +87,20 @@ not assume that `/dev/sdX` permanently identifies one physical disk.
 
 Verified on a Pironman 5 Max using Pironman API 1.3.20 and
 Home Assistant Container. Other hardware variants require additional testing.
+
+### Storage cleanup safety (v1.3.1)
+
+The integration includes experimental persistent storage tracking and
+non-destructive cleanup dry-run infrastructure.
+
+**Automatic removal of storage entities is disabled.**
+
+The Pironman API may return `None` or `0` for unavailable measurements
+or unused device placeholders. These values are treated as unknown,
+not as evidence of physical device removal.
+
+Existing entity unique IDs are preserved. Reliable physical device
+identification is required before automatic cleanup can be enabled.
 
 ## Features
 
