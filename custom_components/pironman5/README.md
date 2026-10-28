@@ -97,7 +97,7 @@ Continuous OLED operation may increase display wear or burn-in risk.
 
 ## Supported Hardware
 
-Version **1.2.0** introduces automatic model detection and capability-aware entity setup.
+Version **1.3.0** adds dynamic NVMe and USB storage discovery, hot-plug support, and availability handling for disconnected drives. It builds on the automatic model detection and capability-aware entity setup introduced in v1.2.0.
 
 | Pironman Model | Implementation | Hardware Verification |
 |---|---|---|

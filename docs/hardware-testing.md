@@ -1,6 +1,6 @@
 # Hardware compatibility and testing
 
-> **Current release:** [v1.2.0 — Multi-Model Support & Automatic Hardware Detection](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases/tag/v1.2.0)
+> **Current version:** v1.3.0 — Dynamic Storage Discovery & Hot-Plug Support
 >
 > Published October 28, 2026. This document distinguishes implemented model support from functionality verified on physical hardware.
 
@@ -11,8 +11,8 @@ This document tracks **verified hardware configurations** and provides a reprodu
 
 | Hardware | Implementation | Verification status | Notes |
 | --- | --- | --- | --- |
-| SunFounder Pironman 5 Max | Model detection and capability-aware entities implemented | **Maintainer-tested** | Home Assistant Container 2026.10.1; Pironman API 1.3.20; successful startup and capability checks. Individual controls have not all been revalidated as part of v1.2.0. |
-| SunFounder Pironman 5 | Model detection and capability-aware entities implemented | Not tested for v1.2.0 | Real-hardware verification needed. |
+| SunFounder Pironman 5 Max | Model detection, capability-aware entities, and dynamic storage discovery implemented | **Maintainer-tested** | Home Assistant Container 2026.10.1; Pironman API 1.3.20; dynamic NVMe/USB discovery and hot-plug tested. Individual OLED, RGB and fan controls have not all been revalidated. |
+| SunFounder Pironman 5 | Model detection and capability-aware entities implemented | Not tested for v1.3.0 | Real-hardware verification needed. |
 | SunFounder Pironman 5 Mini | Model detection and capability-aware entities implemented | Not tested | API and available controls must be verified on real hardware. |
 | SunFounder Pironman 5 Pro Max | Model detection and capability-aware entities implemented | Not tested | API and available controls must be verified on real hardware. |
 | Other Pironman variants | Not confirmed | Not tested | No compatibility claims without evidence. |
@@ -98,6 +98,26 @@ The following checks have been completed on the maintainer's Pironman 5 Max setu
 - Manual model selection does not guarantee the availability of model-specific hardware controls.
 
 This section should be updated as additional test results become available.
+
+## Verification scope for v1.3.0
+
+Dynamic storage discovery was tested on a Pironman 5 Max with
+Home Assistant Container 2026.10.1 and Pironman API 1.3.20.
+
+Verified behavior:
+
+- Detection of available NVMe and USB storage devices.
+- Registration of new storage sensors after USB hot-plug.
+- Unavailable state for disconnected devices.
+- Discovery of devices assigned new Linux paths.
+- Preservation of existing NVMe entity identifiers.
+- Nine passing storage discovery regression tests.
+
+**Limitation:** Linux may reassign `/dev/sdX` device paths.
+Persistent physical drive identification is not yet supported.
+
+Other Pironman hardware variants have not been verified for
+this feature.
 
 ## Contributing test results
 
