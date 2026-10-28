@@ -301,6 +301,19 @@ Save the options and allow the integration to reload. If needed, restart Home As
 
 **Release status:** Published via GitHub Releases. Other models require real-hardware validation; passing a startup test on Pironman 5 Max does not verify all control operations or other models.
 
+### v1.1.5 — Release metadata consistency
+
+- Aligned the integration manifest version and GitHub release tag to `1.1.5`.
+- Included the latest documentation updates from previous maintenance releases.
+- Improved version consistency for HACS installations and updates; no intended functional changes.
+
+### v1.1.4 — Documentation and compatibility update
+
+- Improved README structure, navigation, and installation guidance.
+- Expanded hardware compatibility and testing documentation.
+- Clarified Home Assistant Container and LAN deployment scenarios.
+- Updated integration metadata to `1.1.4`; no intended functional changes.
+
 ### v1.1.3 — HACS maintenance release
 
 - Updated documentation and issue tracker URLs.
