@@ -139,6 +139,31 @@ async def async_setup_entry(hass, entry, async_add_entities):
     discover()
     entry.async_on_unload(coordinator.async_add_listener(discover))
 
+    tracking_task = None
+
+    async def track_storage():
+        """Track missing storage devices after successful API updates."""
+        await coordinator.async_track_storage_absence()
+
+    def schedule_storage_tracking():
+        nonlocal tracking_task
+
+        if not coordinator.last_update_success:
+            return
+
+        if tracking_task is not None and not tracking_task.done():
+            return
+
+        tracking_task = hass.async_create_task(
+            track_storage()
+        )
+
+    entry.async_on_unload(
+        coordinator.async_add_listener(schedule_storage_tracking)
+    )
+
+    schedule_storage_tracking()
+
 
 class PironmanSensor(PironmanEntity, SensorEntity):
     """Expose a sensor backed by the coordinator's current API data."""

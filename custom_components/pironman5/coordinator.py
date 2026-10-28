@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import API_PATH, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .models import AUTO, CONF_MODEL, MODEL_NAMES, resolve_model
+from .storage_cleanup import StorageCleanupTracker
 
 _LOGGER = logging.getLogger(__name__)
 _STORAGE_PERCENT_KEY = re.compile(r"^disk_/dev/(nvme\d+n\d+|sd[a-z]+)_percent$")
@@ -46,6 +47,10 @@ class PironmanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.model_key: str | None = None
         self.model_source = "unknown"
         self.storage_devices: frozenset[str] = frozenset()
+        self.storage_cleanup = StorageCleanupTracker(
+            hass,
+            config_entry.entry_id,
+        )
         self._model_selection = config_entry.options.get(
             CONF_MODEL, config_entry.data.get(CONF_MODEL, AUTO)
         )
@@ -123,6 +128,36 @@ class PironmanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             return merged
         except Exception as err:
             raise UpdateFailed(f"Unable to communicate with Pironman API: {err}") from err
+
+    async def async_track_storage_absence(self) -> set[str]:
+        """Track missing registered storage sensors after a successful refresh."""
+        from homeassistant.helpers import entity_registry as er
+        from .sensor import storage_key_for_unique_suffix
+
+        if not self.last_update_success or not self.supports("storage"):
+            return set()
+
+        registry = er.async_get(self.hass)
+        prefix = f"{self.config_entry.entry_id}_"
+        registered = set()
+
+        for entity in er.async_entries_for_config_entry(
+            registry, self.config_entry.entry_id
+        ):
+            if entity.domain != "sensor" or entity.platform != "pironman5":
+                continue
+            if not entity.unique_id.startswith(prefix):
+                continue
+
+            suffix = entity.unique_id[len(prefix):]
+            device = storage_key_for_unique_suffix(suffix)
+            if device is not None:
+                registered.add(device)
+
+        return await self.storage_cleanup.async_observe(
+            registered,
+            set(self.storage_devices),
+        )
 
     async def post(self, endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.base_url}/{endpoint}"
