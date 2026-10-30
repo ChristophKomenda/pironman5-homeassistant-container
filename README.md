@@ -40,7 +40,7 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 | **Connection** | Local Pironman REST API, default TCP port `34001` |
 | **Installation** | HACS (recommended) or manual |
 | **Deployment** | Same Raspberry Pi or a separate LAN host |
-| **Latest release** | `1.3.1` |
+| **Latest release** | `1.3.2` |
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
@@ -323,6 +323,18 @@ Save the options and allow the integration to reload. If needed, restart Home As
 **Still stuck?** [Open a bug report](https://github.com/ChristophKomenda/pironman5-homeassistant-container/issues/new/choose) and include your integration version, Home Assistant version, Pironman model, installation type, reproduction steps, and **redacted** logs.
 
 ## Releases
+
+### v1.3.2 — Multi-Device Support & microSD Monitoring
+
+- Support for multiple Pironman devices in one Home Assistant instance.
+- Independent monitoring and control for each configured device.
+- Dynamic Raspberry Pi microSD storage discovery (`/dev/mmcblk0`).
+- Storage partition filtering to avoid duplicate sensors.
+- Existing NVMe and USB storage sensor identifiers remain unchanged.
+- 66 automated tests passed.
+- Verified with two Pironman 5 Max devices simultaneously.
+
+[Release v1.3.2](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases/tag/v1.3.2)
 
 ### v1.3.0 — Dynamic Storage Discovery & Hot-Plug Support
 
