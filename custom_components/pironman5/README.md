@@ -97,7 +97,9 @@ Continuous OLED operation may increase display wear or burn-in risk.
 
 ## Supported Hardware
 
-Version **1.3.0** adds dynamic NVMe and USB storage discovery, hot-plug support, and availability handling for disconnected drives. It builds on the automatic model detection and capability-aware entity setup introduced in v1.2.0.
+Version **1.3.2** introduces support for multiple Pironman devices in one Home Assistant instance and adds Raspberry Pi microSD storage monitoring. It builds on dynamic NVMe and USB storage discovery introduced in v1.3.0 and automatic model detection introduced in v1.2.0.
+
+**Validated:** 66 automated tests passed, and two Pironman 5 Max devices were successfully monitored simultaneously using Home Assistant Container.
 
 | Pironman Model | Implementation | Hardware Verification |
 |---|---|---|
