@@ -16,7 +16,7 @@ from .models import AUTO, CONF_MODEL, MODEL_NAMES, resolve_model
 from .storage_cleanup import StorageCleanupTracker
 
 _LOGGER = logging.getLogger(__name__)
-_STORAGE_PERCENT_KEY = re.compile(r"^disk_/dev/(nvme\d+n\d+|sd[a-z]+)_percent$")
+_STORAGE_PERCENT_KEY = re.compile(r"^disk_/dev/(nvme\d+n\d+|sd[a-z]+|mmcblk\d+)_percent$")
 
 
 def available_storage_devices(data: dict[str, Any] | None) -> frozenset[str]:

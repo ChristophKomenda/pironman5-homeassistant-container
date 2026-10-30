@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.2] - 2026-10-30
+
+### Added
+- Support for multiple Pironman 5 devices in one Home Assistant instance.
+- Raspberry Pi microSD storage monitoring (`/dev/mmcblk0`).
+- Regression tests for multi-device configuration and SD card discovery.
+
+### Changed
+- Removed the single-config-entry restriction.
+- Extended dynamic storage discovery to include `mmcblk` devices.
+
+### Verified
+- 66 automated tests passed during development.
+- Successfully tested two Pironman 5 Max devices simultaneously.
+- Confirmed independent hardware sensors and microSD monitoring.
+
 ## [1.3.1] - 2026-10-28
 
 ### Added

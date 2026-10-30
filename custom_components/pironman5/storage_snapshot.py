@@ -3,7 +3,7 @@
 import re
 
 _STORAGE_TOTAL = re.compile(
-    r"^disk_/dev/(?P<device>sd[a-z]+|nvme\d+n\d+)_total$"
+    r"^disk_/dev/(?P<device>sd[a-z]+|nvme\d+n\d+|mmcblk\d+)_total$"
 )
 
 

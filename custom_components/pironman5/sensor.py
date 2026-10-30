@@ -29,7 +29,7 @@ SENSORS = [
 ]
 
 # Whole block devices only; partitions (nvme0n1p1, sda1) are excluded.
-_STORAGE_KEY = re.compile(r"^disk_/dev/(nvme\d+n\d+|sd[a-z]+)_percent$")
+_STORAGE_KEY = re.compile(r"^disk_/dev/(nvme\d+n\d+|sd[a-z]+|mmcblk\d+)_percent$")
 _LEGACY = {"nvme0n1": "nvme_usage", "nvme1n1": "nvme1_usage"}
 
 
@@ -65,7 +65,7 @@ def storage_key_for_unique_suffix(suffix):
             return device
     if suffix.startswith("storage_") and suffix.endswith("_usage"):
         device = suffix[len("storage_"):-len("_usage")]
-        if re.fullmatch(r"(?:nvme\d+n\d+|sd[a-z]+)", device):
+        if re.fullmatch(r"(?:nvme\d+n\d+|sd[a-z]+|mmcblk\d+)", device):
             return device
     if suffix.startswith("nvme_nvme") and suffix.endswith("_usage"):
         device = suffix[len("nvme_"):-len("_usage")]
