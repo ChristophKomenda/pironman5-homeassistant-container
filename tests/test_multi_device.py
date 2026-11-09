@@ -36,4 +36,4 @@ def test_manifest_version():
     manifest = json.loads(
         (COMPONENT / "manifest.json").read_text()
     )
-    assert manifest["version"] == "1.3.2"
+    assert manifest["version"] == "1.3.3"

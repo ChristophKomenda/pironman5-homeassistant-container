@@ -34,6 +34,19 @@ Monitor your Raspberry Pi hardware using native Home Assistant entities.
 
 Sensor availability depends on the connected hardware and the information exposed by the installed Pironman API.
 
+### Sensor display units (v1.3.3)
+
+Home Assistant receives the original SunFounder API measurements while suggesting
+more readable presentation units: network transfer rates in **kB/s**, used memory
+in **GiB**, and CPU frequency in **GHz**. The fan speed sensor reports **rpm**
+(revolutions per minute), not percent. Numeric sensors support Home Assistant
+measurement statistics. Display units can be customized in the entity settings.
+
+Existing entities may retain their previously selected units after updating.
+The integration does not automatically switch between kB/s and MB/s at different
+transfer rates; select a preferred unit in Home Assistant when needed.
+
+
 ### Fan Control
 
 Manage supported cooling settings directly from Home Assistant.

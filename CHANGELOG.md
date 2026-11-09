@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.3] - 2026-11-09
+
+### Improved
+- Suggested readable network transfer rates in kB/s, used RAM in GiB and CPU frequency in GHz.
+- Configured sensible display precision for network, memory, CPU frequency and temperatures.
+- Identified CPU frequency as a frequency sensor and exposed measurement state classes.
+
+### Fixed
+- Report PWM fan speed as rpm instead of the incorrect percentage unit.
+
+### Compatibility
+- Raw Pironman API values, existing entity unique IDs, hardware discovery and device controls remain unchanged.
+- Previously configured Home Assistant display units may need manual adjustment.
+- Added regression tests for the new sensor display metadata.
+
+
 ## [1.3.2] - 2026-10-30
 
 ### Added

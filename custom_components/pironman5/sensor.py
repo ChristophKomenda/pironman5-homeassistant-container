@@ -2,7 +2,7 @@
 
 import re
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.helpers import entity_registry as er
 from homeassistant.const import (
     PERCENTAGE,
@@ -20,12 +20,12 @@ SENSORS = [
     ("cpu_temperature", "CPU Temperature", SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, "cpu_temperature"),
     ("gpu_temperature", "GPU Temperature", SensorDeviceClass.TEMPERATURE, UnitOfTemperature.CELSIUS, "gpu_temperature"),
     ("cpu_usage", "CPU Usage", None, PERCENTAGE, "cpu_percent"),
-    ("cpu_frequency", "CPU Frequency", None, UnitOfFrequency.MEGAHERTZ, "cpu_freq"),
+    ("cpu_frequency", "CPU Frequency", SensorDeviceClass.FREQUENCY, UnitOfFrequency.MEGAHERTZ, "cpu_freq"),
     ("memory_usage", "Memory Usage", None, PERCENTAGE, "memory_percent"),
     ("memory_used", "Memory Used", SensorDeviceClass.DATA_SIZE, UnitOfInformation.BYTES, "memory_used"),
     ("network_download", "Network Download", SensorDeviceClass.DATA_RATE, UnitOfDataRate.BYTES_PER_SECOND, "network_download_speed"),
     ("network_upload", "Network Upload", SensorDeviceClass.DATA_RATE, UnitOfDataRate.BYTES_PER_SECOND, "network_upload_speed"),
-    ("fan_speed", "Fan Speed", None, PERCENTAGE, "pwm_fan_speed"),
+    ("fan_speed", "Fan Speed", None, "rpm", "pwm_fan_speed"),
 ]
 
 # Whole block devices only; partitions (nvme0n1p1, sda1) are excluded.
@@ -223,6 +223,21 @@ class PironmanSensor(PironmanEntity, SensorEntity):
         self._attr_unique_id = f"{entry_id}_{key}"
         self._attr_device_class = device_class
         self._attr_native_unit_of_measurement = unit
+        # Keep raw API values and unique IDs stable; suggest a readable UI unit.
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        if key in ("network_download", "network_upload"):
+            self._attr_suggested_unit_of_measurement = UnitOfDataRate.KILOBYTES_PER_SECOND
+            self._attr_suggested_display_precision = 1
+        elif key == "memory_used":
+            self._attr_suggested_unit_of_measurement = UnitOfInformation.GIBIBYTES
+            self._attr_suggested_display_precision = 2
+        elif key == "cpu_frequency":
+            self._attr_suggested_unit_of_measurement = UnitOfFrequency.GIGAHERTZ
+            self._attr_suggested_display_precision = 2
+        elif key in ("cpu_temperature", "gpu_temperature"):
+            self._attr_suggested_display_precision = 1
+        elif key == "fan_speed":
+            self._attr_suggested_display_precision = 0
         self._data_key = data_key
         self._storage_device = storage_device
         self._attr_has_entity_name = True
