@@ -40,7 +40,7 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 | **Connection** | Local Pironman REST API, default TCP port `34001` |
 | **Installation** | HACS (recommended) or manual |
 | **Deployment** | Same Raspberry Pi or a separate LAN host |
-| **Latest release** | `1.3.2` |
+| **Latest release** | `1.3.3` |
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
