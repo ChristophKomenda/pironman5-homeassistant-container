@@ -40,7 +40,7 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 | **Connection** | Local Pironman REST API, default TCP port `34001` |
 | **Installation** | HACS (recommended) or manual |
 | **Deployment** | Same Raspberry Pi or a separate LAN host |
-| **Latest release** | `1.3.3` |
+| **Integration version** | `1.4.0` (check GitHub Releases for the latest published tag) |
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
@@ -67,6 +67,37 @@ For a model-by-model matrix, reproducible test checklist, and instructions for s
 - **Monitoring:** CPU, GPU, memory, dynamically discovered NVMe and USB storage, network traffic, and cooling.
 - **Control:** Fan profiles, RGB lighting, and OLED display settings.
 - **Flexible:** Configure API host, port, and polling interval without reinstalling.
+
+## What's new in v1.4.0 — Extended Hardware Diagnostics & Pro Max Readiness
+
+Version 1.4.0 expands **local, read-only diagnostics** while keeping existing
+entity unique IDs and existing hardware controls unchanged. The new diagnostics
+use the Pironman software's existing REST API; no new broker, daemon, cloud
+service, or Home Assistant add-on is required.
+
+| Feature | What it does | Availability |
+|---|---|---|
+| Network interface IP sensors | Creates a diagnostic sensor for each interface reported by `GET /api/v1.0/get-ips` | Only when the optional endpoint supplies an IP address |
+| RGB LED Count | Displays the configured `rgb_led_count` as a **read-only** diagnostic sensor | Only when the API returns the setting and RGB support is reported by the existing compatibility logic |
+| Expanded model diagnostics | Shows the Pironman software version and reported peripheral names as attributes of the existing model sensor | Values depend on `/get-device-info` |
+| Home Assistant diagnostics download | Includes an allowlisted summary of model, version, peripheral names, network interface names, disk device names, and update status | Excludes the host, IP addresses, MAC addresses, configuration contents, and logs |
+| Explicit capability check | Provides `supports_explicit()` for future model-specific integrations; missing peripheral metadata is **not** considered positive evidence | Internal safeguard; does not create new Pro Max controls |
+
+**Network polling:** `get-ips` is requested at most once every **60 seconds**
+regardless of the normal **5–60 second** integration polling interval. If the
+optional API endpoint is absent or fails, core monitoring continues to work.
+An IP-address diagnostic sensor can become unavailable until networking or
+API access recovers.
+
+**Pro Max scope:** The upstream Pironman software identifies the Pro Max model,
+but its touchscreen, camera, speakers, IR receiver, and power-button events are
+**not exposed as verified controls by the REST API used here**. This release
+does not add camera, touchscreen, audio, IR, or power-button entities. Pro Max
+compatibility still requires testing with physical hardware. Fan profile
+controls must not be assumed to exist simply because a model is detected.
+
+See [v1.4.0 technical notes](docs/v1.4.0-extended-diagnostics.md) and the
+[hardware test matrix](docs/hardware-testing.md).
 
 ## Dynamic storage discovery (v1.3.0)
 
@@ -112,8 +143,9 @@ identification is required before automatic cleanup can be enabled.
 | GPU | Temperature |
 | Memory | Usage percentage and used memory |
 | Storage | Dynamically discovered NVMe and USB disk usage |
-| Network | Download and upload speed |
+| Network | Download and upload speed; optional per-interface IP diagnostic sensors (v1.4.0) |
 | Cooling | Fan speed and running status |
+| Device diagnostics | Model, software version, reported peripherals; optional read-only RGB LED count |
 
 Sensor availability depends on the hardware and data provided by the installed Pironman software.
 
@@ -323,6 +355,16 @@ Save the options and allow the integration to reload. If needed, restart Home As
 **Still stuck?** [Open a bug report](https://github.com/ChristophKomenda/pironman5-homeassistant-container/issues/new/choose) and include your integration version, Home Assistant version, Pironman model, installation type, reproduction steps, and **redacted** logs.
 
 ## Releases
+
+### v1.4.0 — Extended Hardware Diagnostics & Pro Max Readiness
+
+- Optional local network IP-address diagnostics, throttled to 60-second requests.
+- Read-only RGB LED count sensor where supported by API data.
+- Software version and peripherals on the model sensor.
+- Allowlisted, privacy-conscious Home Assistant diagnostics download.
+- Explicit capability checks for future hardware extensions; Pro Max remains unverified on real hardware.
+- 76 automated Python tests passed; HACS and Hassfest checks passed in [PR #14](https://github.com/ChristophKomenda/pironman5-homeassistant-container/pull/14).
+- [Release history](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases) (publication status of `v1.4.0` may differ from the version on `main`).
 
 ### v1.3.2 — Multi-Device Support & microSD Monitoring
 

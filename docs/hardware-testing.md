@@ -1,8 +1,8 @@
 # Hardware compatibility and testing
 
-> **Current version:** v1.3.0 — Dynamic Storage Discovery & Hot-Plug Support
+> **Current integration version:** v1.4.0 — Extended Hardware Diagnostics & Pro Max Readiness
 >
-> Published October 28, 2026. This document distinguishes implemented model support from functionality verified on physical hardware.
+> v1.4.0 software tests passed on November 18, 2026; on-device verification for new features is still pending. Earlier hardware verification is documented separately below.
 
 
 This document tracks **verified hardware configurations** and provides a reproducible test plan for the community. It is not a promise of compatibility with untested Pironman variants.
@@ -14,7 +14,7 @@ This document tracks **verified hardware configurations** and provides a reprodu
 | SunFounder Pironman 5 Max | Model detection, capability-aware entities, and dynamic storage discovery implemented | **Maintainer-tested** | Home Assistant Container 2026.10.1; Pironman API 1.3.20; dynamic NVMe/USB discovery and hot-plug tested. Individual OLED, RGB and fan controls have not all been revalidated. |
 | SunFounder Pironman 5 | Model detection and capability-aware entities implemented | Not tested for v1.3.0 | Real-hardware verification needed. |
 | SunFounder Pironman 5 Mini | Model detection and capability-aware entities implemented | Not tested | API and available controls must be verified on real hardware. |
-| SunFounder Pironman 5 Pro Max | Model detection and capability-aware entities implemented | Not tested | API and available controls must be verified on real hardware. |
+| SunFounder Pironman 5 Pro Max | Model detection, capability-aware entities and v1.4.0 diagnostics code implemented | **Not hardware-tested** | New diagnostics and all device-specific functionality require real-hardware verification; no camera/touch/audio/IR REST controls claimed. |
 | Other Pironman variants | Not confirmed | Not tested | No compatibility claims without evidence. |
 
 **Important:** An implemented model selector is not the same as verified hardware compatibility. Capability-aware setup uses the `peripherals` list from `/get-device-info` when available. Missing capability metadata triggers legacy behavior, not a guarantee that every entity is supported. Manual selection does not add missing hardware capabilities.
@@ -59,6 +59,9 @@ Capability-aware entity visibility: PASS / FAIL / NOT TESTED
 CPU / GPU / memory sensors: PASS / FAIL / NOT TESTED
 NVMe sensors (state number of installed drives): PASS / FAIL / NOT TESTED
 Network sensors: PASS / FAIL / NOT TESTED
+Network IP sensors from /get-ips (v1.4.0): PASS / FAIL / NOT TESTED
+RGB LED count diagnostic sensor (v1.4.0): PASS / FAIL / NOT TESTED
+Home Assistant diagnostics export (privacy reviewed): PASS / FAIL / NOT TESTED
 Fan speed and profiles: PASS / FAIL / NOT TESTED
 RGB power / color / effects: PASS / FAIL / NOT TESTED
 OLED controls / sleep timeout: PASS / FAIL / NOT TESTED
@@ -118,6 +121,32 @@ Persistent physical drive identification is not yet supported.
 
 Other Pironman hardware variants have not been verified for
 this feature.
+
+## Verification scope for v1.4.0
+
+**Software checks completed:** 76 local Python tests passed; HACS validation
+and Hassfest passed on [PR #14](https://github.com/ChristophKomenda/pironman5-homeassistant-container/pull/14).
+These checks do not replace physical hardware testing.
+
+The v1.4.0 implementation adds network interface IP diagnostic sensors from
+`GET /api/v1.0/get-ips`, a read-only RGB LED count sensor, model sensor
+attributes for software version and peripherals, and a privacy-conscious
+Home Assistant diagnostic download. The optional network endpoint is polled
+at most once every 60 seconds.
+
+**Additional on-device checks requested:**
+
+- Confirm `get-ips` returns an `ips` mapping on the installed Pironman software.
+- Confirm each reported interface gets an IP diagnostic sensor, and that it
+  recovers after an API interruption.
+- Confirm `rgb_led_count` appears only when supplied by the API.
+- Confirm diagnostics exports omit hostnames/IP addresses/MAC addresses and logs.
+- Confirm existing NVMe, microSD, RGB, OLED and fan entities are unaffected.
+- Confirm the Pro Max's actually reported peripherals on physical hardware
+  before asserting new model-specific functionality.
+
+**Not implemented in v1.4.0:** touchscreen/camera/speaker/IR remote controls
+and power-button event entities. No new services are required.
 
 ## Contributing test results
 
