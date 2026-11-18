@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.4.0] - 2026-11-18
+
+### Added
+- Optional per-interface IP address diagnostic sensors using `GET /api/v1.0/get-ips`.
+- Read-only RGB LED count sensor when provided by the API.
+- Software version and API-reported peripherals on the model diagnostic sensor.
+- Home Assistant diagnostics download with allowlisted metadata only.
+- Internal explicit hardware capability detection for future model-specific entities.
+- Automated tests for network payload parsing, Pro Max identification, optional endpoint handling and diagnostic privacy.
+
+### Changed
+- Throttle optional IP metadata requests to at most one per 60 seconds.
+- Preserve existing entity unique IDs and legacy capability handling for previously supported controls.
+- Do not interrupt core monitoring when the optional network endpoint fails.
+
+### Validation and limitations
+- 76 local Python tests passed; GitHub HACS and Hassfest validation passed on PR #14.
+- Pro Max support is software-ready but **not yet hardware-verified**.
+- Camera, touchscreen, audio, IR and power-button events are **not** part of this release.
+- RGB LED count is read-only pending verified device-specific write limits.
+- v1.4.0 integration code is on `main`; check GitHub Releases for the publication status of the v1.4.0 tag.
+
+
 ## [1.3.3] - 2026-11-09
 
 ### Improved

@@ -28,11 +28,29 @@ Monitor your Raspberry Pi hardware using native Home Assistant entities.
 | GPU | Temperature |
 | Memory | Usage percentage, used memory |
 | Storage | NVMe 0 and NVMe 1 usage |
-| Network | Download and upload speed |
+| Network | Download and upload speed; optional per-interface IP diagnostic sensors |
 | Cooling | Fan speed and running status |
-| Device | Detected Pironman model |
+| Device | Detected model, software version, reported peripherals; read-only RGB LED count where available |
 
 Sensor availability depends on the connected hardware and the information exposed by the installed Pironman API.
+
+### Extended hardware diagnostics (v1.4.0)
+
+Version **1.4.0** adds optional, read-only network-interface IP sensors via
+`GET /api/v1.0/get-ips`, refreshed no more than once every 60 seconds. The
+model sensor now includes Pironman software version and API-reported peripheral
+information. Where available, the configured RGB LED count is shown as a
+read-only diagnostic sensor.
+
+The integration also supports a privacy-conscious Home Assistant diagnostics
+download: IP/MAC addresses, connection host, unfiltered configuration and logs
+are deliberately omitted. A new internal explicit-capability check prepares
+for future device-specific features without inventing unsupported endpoints.
+
+These changes use the **existing local REST API** and require no new services.
+Physical **Pro Max verification remains outstanding**; touchscreen, camera,
+audio, infrared and hardware-button events are not implemented by this release.
+See [v1.4.0 technical notes](https://github.com/ChristophKomenda/pironman5-homeassistant-container/blob/main/docs/v1.4.0-extended-diagnostics.md).
 
 ### Sensor display units (v1.3.3)
 
@@ -110,9 +128,9 @@ Continuous OLED operation may increase display wear or burn-in risk.
 
 ## Supported Hardware
 
-Version **1.3.2** introduces support for multiple Pironman devices in one Home Assistant instance and adds Raspberry Pi microSD storage monitoring. It builds on dynamic NVMe and USB storage discovery introduced in v1.3.0 and automatic model detection introduced in v1.2.0.
+Version **1.3.2** introduced support for multiple Pironman devices in one Home Assistant instance and adds Raspberry Pi microSD storage monitoring. It builds on dynamic NVMe and USB storage discovery introduced in v1.3.0 and automatic model detection introduced in v1.2.0.
 
-**Validated:** 66 automated tests passed, and two Pironman 5 Max devices were successfully monitored simultaneously using Home Assistant Container.
+**Previous hardware validation:** Two Pironman 5 Max devices were monitored simultaneously using Home Assistant Container for v1.3.2 (66 passing tests at that time). **v1.4.0 software validation:** 76 Python tests plus successful HACS and Hassfest checks; new functionality has not yet been verified on physical Pro Max hardware.
 
 | Pironman Model | Implementation | Hardware Verification |
 |---|---|---|
@@ -225,6 +243,7 @@ Example API endpoints:
 | `/get-device-info` | Device identification and capabilities |
 | `/get-data` | System monitoring values |
 | `/get-config` | Hardware configuration |
+| `/get-ips` | Optional per-interface IP address diagnostics (at most every 60 seconds) |
 
 Control commands are sent through the appropriate API endpoints.
 
