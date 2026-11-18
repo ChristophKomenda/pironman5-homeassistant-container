@@ -3,6 +3,7 @@
 import re
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers import entity_registry as er
 from homeassistant.const import (
     PERCENTAGE,
@@ -98,6 +99,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
             entities.append(PironmanSensor(
                 coordinator, entry.entry_id, key, name, device_class, unit, data_key
             ))
+
+        # Network addresses require a successful optional vendor API response.
+        for interface in sorted(coordinator.network_addresses):
+            key = f"network_ip_{interface}"
+            if key not in known:
+                known.add(key)
+                entities.append(PironmanIPAddress(coordinator, entry.entry_id, interface))
+
+        if coordinator.supports("ws2812") and "rgb_led_count" in data and "rgb_led_count" not in known:
+            known.add("rgb_led_count")
+            entities.append(PironmanRGBLEDCount(coordinator, entry.entry_id))
 
         # Only create storage sensors if the model supports storage. When the
         # API omits capabilities, coordinator.supports keeps legacy behavior.
@@ -278,4 +290,47 @@ class PironmanModelSensor(PironmanEntity, SensorEntity):
         return {
             "model_key": self.coordinator.model_key,
             "detection_source": self.coordinator.model_source,
+            "software_version": self.coordinator.device_info_data.get("version"),
+            "reported_peripherals": sorted(self.coordinator.peripherals) if self.coordinator.peripherals is not None else None,
         }
+
+
+class PironmanIPAddress(PironmanEntity, SensorEntity):
+    """IP address for a network interface reported by the vendor."""
+    _attr_has_entity_name = True
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:ip-network"
+
+    def __init__(self, coordinator, entry_id, interface):
+        super().__init__(coordinator)
+        self.interface = interface
+        self._attr_name = f"{interface} IP Address"
+        self._attr_unique_id = f"{entry_id}_network_ip_{interface}"
+
+    @property
+    def available(self):
+        return super().available and self.interface in self.coordinator.network_addresses
+
+    @property
+    def native_value(self):
+        return self.coordinator.network_addresses.get(self.interface)
+
+
+class PironmanRGBLEDCount(PironmanEntity, SensorEntity):
+    """Read-only LED count until safe model-specific write limits are known."""
+    _attr_name = "RGB LED Count"
+    _attr_has_entity_name = True
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:led-strip-variant"
+
+    def __init__(self, coordinator, entry_id):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry_id}_rgb_led_count"
+
+    @property
+    def available(self):
+        return super().available and self.coordinator.data.get("rgb_led_count") is not None
+
+    @property
+    def native_value(self):
+        return self.coordinator.data.get("rgb_led_count")
