@@ -1,6 +1,7 @@
 """Coordinator for the local Pironman REST API."""
 
 from datetime import timedelta
+from time import monotonic
 import logging
 import re
 from typing import Any
@@ -13,6 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import API_PATH, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .models import AUTO, CONF_MODEL, MODEL_NAMES, resolve_model
+from .network import extract_ip_addresses
 from .storage_cleanup import StorageCleanupTracker
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,6 +49,8 @@ class PironmanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.model_key: str | None = None
         self.model_source = "unknown"
         self.storage_devices: frozenset[str] = frozenset()
+        self.network_addresses: dict[str, str] = {}
+        self._next_network_refresh = 0.0
         self.storage_cleanup = StorageCleanupTracker(
             hass,
             config_entry.entry_id,
@@ -102,6 +106,27 @@ class PironmanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             return True
         return peripheral in self.peripherals
 
+    def supports_explicit(self, peripheral: str) -> bool:
+        """Require positive API metadata for future model-specific features."""
+        return self.peripherals is not None and peripheral in self.peripherals
+
+    async def _async_refresh_network(self) -> None:
+        """Poll optional network metadata at most every 60 seconds."""
+        if monotonic() < self._next_network_refresh:
+            return
+        self._next_network_refresh = monotonic() + 60
+        try:
+            async with self.session.get(f"{self.base_url}/get-ips", timeout=5) as response:
+                response.raise_for_status()
+                result = await response.json()
+            if not isinstance(result, dict) or result.get("status") is not True:
+                self.network_addresses = {}
+                return
+            self.network_addresses = extract_ip_addresses(result.get("data"))
+        except Exception as err:
+            self.network_addresses = {}
+            _LOGGER.debug("Optional get-ips endpoint unavailable: %s", err)
+
     async def _async_update_data(self) -> dict[str, Any]:
         try:
             async with self.session.get(f"{self.base_url}/get-data", timeout=5) as response:
@@ -122,6 +147,7 @@ class PironmanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if not isinstance(config, dict):
                 raise UpdateFailed("Invalid Pironman configuration payload")
             merged = {**data, **config}
+            await self._async_refresh_network()
             self.storage_devices = (
                 available_storage_devices(merged) if self.supports("storage") else frozenset()
             )
