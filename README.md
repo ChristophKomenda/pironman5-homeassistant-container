@@ -9,9 +9,9 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 [![License: MIT](https://img.shields.io/github/license/ChristophKomenda/pironman5-homeassistant-container)](LICENSE)
 [![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5)](https://github.com/hacs/default/pull/12242)
 
-**Local REST API · No MQTT · No cloud dependency · Configurable polling · Native Home Assistant entities**
+**Local REST API · No MQTT · No cloud dependency · Native Home Assistant entities · Optional IR receiver / HAIR (Pironman 5 Max)**
 
-[Install](#installation) · [Features](#features) · [Configure](#configuration) · [Troubleshooting](#troubleshooting) · [Community](#community--support)
+[Install](#installation) · [IR / HAIR](#native-ir-receiver--hair-v150) · [Features](#features) · [Configure](#configuration) · [Troubleshooting](#troubleshooting) · [Community](#community--support)
 
 > [!IMPORTANT]
 > **Official HACS default repository integration.** Pironman 5 was reviewed and accepted via [hacs/default#12242](https://github.com/hacs/default/pull/12242). Find **Pironman 5** directly in HACS; no custom repository URL is needed.
@@ -67,8 +67,35 @@ For a model-by-model matrix, reproducible test checklist, and instructions for s
 - **Monitoring:** CPU, GPU, memory, dynamically discovered NVMe and USB storage, network traffic, and cooling.
 - **Control:** Fan profiles, RGB lighting, and OLED display settings.
 - **Flexible:** Configure API host, port, and polling interval without reinstalling.
+- **Optional IR receiver:** Receive and learn remote-control signals through Home Assistant's native infrared platform and HAIR (tested on Pironman 5 Max; host-side service required).
 
-## What's new in v1.4.0 — Extended Hardware Diagnostics & Pro Max Readiness
+## What's new in v1.5.0 — Native IR Receiver & HAIR Support
+
+Version **1.5.0** introduces optional, **receive-only** native infrared support
+for the built-in IR receiver in the **SunFounder Pironman 5 Max**. The receiver
+was tested with an RC-5 remote and **HAIR**, which discovered it and captured
+remote-control signals. Existing monitoring and hardware controls are unaffected
+when IR is disabled (the default).
+
+- Native Home Assistant `InfraredReceiverEntity` integrated in your existing
+  **Pironman 5** configuration entry; no second custom integration required.
+- Unique **IR bridge device ID** per configured Pironman, suitable for multiple
+  independently configured Raspberry Pi hosts.
+- Optional Linux LIRC host-side bridge with systemd autostart, device rediscovery
+  and reconnection. The host bridge must be installed separately; **HACS cannot
+  install systemd services** on the Raspberry Pi.
+- Raw pulse/space frames preserve RC-5 toggle information in the waveform;
+  the bridge does not independently decode toggle bits or generate press/release events.
+
+**Status:** v1.5.0 is a regular GitHub release, but the **IR feature remains
+experimental**. IR reception was verified on Pironman 5 Max only. Other
+Pironman models and long-term operation still need testing. IR transmission
+is not supported.
+
+See the [full IR / HAIR setup guide](docs/native-ir-hair.md) and
+[host bridge instructions](ir_bridge/README.md).
+
+## Previous release: v1.4.0 — Extended Hardware Diagnostics & Pro Max Readiness
 
 Version 1.4.0 expands **local, read-only diagnostics** while keeping existing
 entity unique IDs and existing hardware controls unchanged. The new diagnostics
@@ -200,6 +227,29 @@ To use it, open **Settings → Devices & Services → Pironman 5**, select your 
 
 `0` disables automatic sleep; `1–3600` seconds sets the timeout. The Always On switch is a convenient alternative to setting the value manually.
 
+## Native IR receiver / HAIR (v1.5.0)
+
+**Pironman 5 Max only (verified).** To use the built-in IR receiver in HAIR:
+
+1. Install or update **Pironman 5 v1.5.0** through HACS, then restart Home Assistant.
+2. On the Raspberry Pi with the IR receiver, verify that `/dev/lirc0` (or another
+   `/dev/lircN`) exists and create a Home Assistant long-lived access token.
+3. Follow the [host bridge installation instructions](docs/native-ir-hair.md#host-bridge-required-hacs-cannot-install-systemd-host-software)
+   to install the Python/systemd listener. Store the token in a root-readable
+   file and do not commit it to Git.
+4. Under **Settings → Devices & services → Pironman 5 → Configure**, enable
+   **Enable experimental native infrared receiver** for the correct Pironman
+   and set a unique bridge ID matching the host listener (e.g. `raspberrypi`).
+5. In **HAIR → Sniffer**, select the receiver belonging to the **Pironman 5**
+   integration, then test with an IR remote.
+
+HACS installs only the Home Assistant integration. **The host bridge is required**
+for IR reception and is **not** installed automatically by HACS. Use a distinct
+bridge ID and listener on every supported host. With two Pironman devices, enable
+IR only for the device with a configured listener; never reuse an ID.
+
+See [complete requirements, diagnostics and limitations](docs/native-ir-hair.md).
+
 ## Installation
 
 ### Option A — HACS (recommended)
@@ -266,6 +316,8 @@ Navigate to **Settings → Devices & Services → Pironman 5 → Configure**.
 | API port | Default `34001` |
 | Polling interval | Configurable from `5` to `60` seconds |
 | Model | Automatic (recommended) or manual Pironman 5 family selection |
+| Enable experimental native infrared receiver | Optional; requires the host IR bridge; verified on Pironman 5 Max |
+| IR bridge device ID | Unique host identifier matching `--device-id` of the host listener |
 
 Configuration changes trigger an integration reload. A **10-second** polling interval is a reasonable starting point. Shorter intervals increase API requests; longer intervals reduce polling traffic.
 
@@ -355,6 +407,15 @@ Save the options and allow the integration to reload. If needed, restart Home As
 **Still stuck?** [Open a bug report](https://github.com/ChristophKomenda/pironman5-homeassistant-container/issues/new/choose) and include your integration version, Home Assistant version, Pironman model, installation type, reproduction steps, and **redacted** logs.
 
 ## Releases
+
+### v1.5.0 — Native IR Receiver & HAIR Support
+
+- Optional native, receive-only IR receiver for Pironman 5 Max.
+- HAIR confirmed to recognize RC-5 remotes through the built-in IR hardware.
+- Host-side LIRC bridge with optional systemd autostart and reconnect handling.
+- Multi-host bridge IDs; existing monitoring and controls retained.
+- IR is experimental and needs a separately installed host listener.
+- [Release v1.5.0](https://github.com/ChristophKomenda/pironman5-homeassistant-container/releases/tag/v1.5.0) · [IR / HAIR setup](docs/native-ir-hair.md).
 
 ### v1.4.0 — Extended Hardware Diagnostics & Pro Max Readiness
 

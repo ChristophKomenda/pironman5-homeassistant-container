@@ -1,77 +1,96 @@
-# Pironman 5 — Native IR / HAIR integration (v0.6 experimental)
+# Pironman 5 v1.5.0 — Host IR bridge for HAIR
 
-A **local integration patch**, not an official release. Targets the currently examined `pironman5` v1.4.0 HACS code. The host-side LIRC bridge and the existing Pironman REST API perform separate jobs.
+The optional **receive-only** IR receiver is integrated in the existing
+**Pironman 5** HACS integration (v1.5.0). The Python host listener in this
+folder is the required companion for reading `/dev/lircN` on a supported
+Raspberry Pi. **HACS cannot install or manage host-side systemd services.**
 
-## Features / boundaries
+The IR feature remains **experimental**, even though v1.5.0 is a regular
+GitHub release. Verified hardware: **Pironman 5 Max**, using an RC-5 remote
+with HAIR. Other Pironman models have not been validated.
 
-- New **optional** `infrared` platform in the EXISTING `pironman5` config entry. Uses native `InfraredReceiverEntity` and publishes raw IR frames to HAIR.
-- Receiver uses existing Pironman device registry identity; no second custom integration is needed in the eventual HACS release.
-- Supports **multiple hosts**: every existing Pironman config entry chooses its own bridge ID. Use a unique bridge ID per Pi and a separate listener/token on each host.
-- Raw RC5 telegrams are transmitted **unchanged**, including toggle information encoded in the waveform. Held-button telegrams are **not suppressed**; HAIR's decoder can distinguish them. This implementation does not independently parse or classify the RC5 toggle bit.
-- The bridge reconnects if `/dev/lircN` disappears or Linux renumbers the device, and a systemd unit restarts it after crashes/reboots. It does **not** guarantee zero loss of events during Wi-Fi/HA outages; the queue is bounded and failed POSTs are not retried.
-- Only **IR receive**. Requires Home Assistant with native infrared platform (confirmed on the user's HA). The host must expose Linux `/dev/lircN` via gpio-ir-recv. No new pip packages.
-- **Not yet field-tested as combined v0.6**. Previous separate v0.5 bridge and `pironman_ir_experimental` entity were tested successfully with HAIR.
+## Requirements
 
-## Before install
+- Linux Raspberry Pi host with `gpio_ir_recv` and a working `/dev/lircN`
+  (try `ls -l /dev/lirc*` and `sudo mode2 -d /dev/lirc0`).
+- Home Assistant with native infrared support and the **Pironman 5 v1.5.0**
+  HACS integration; HAIR is optional but recommended for testing and learning.
+- Python 3, systemd and a Home Assistant long-lived access token.
+- IP connectivity from the Pi to the Home Assistant API; use a trusted LAN.
 
-Make a Home Assistant backup or snapshot first. Keep the existing v0.4 decoded-event bridge running if you need its automation events. Use a separate systemd service for raw reception.
+## Installation
 
-When ready to migrate, **remove the old Pironman IR Receiver (Experimental) config entry via Home Assistant UI**. Doing so can remove its old IR entity association in HAIR. Plan to reassign the new receiver in HAIR if necessary. Do not delete the existing `pironman5` HACS integration.
+Clone the repository or download the v1.5.0 release source archive on the
+Raspberry Pi hosting the receiver, then change to the repository root.
 
-## Installation on the Raspberry Pi
+Create and protect the API token file **on the Pi**:
 
-1. Download `pironman-ir-v06.zip` and copy it to `/home/admin/` using SCP.
-2. Unpack into `/home/admin/pironman-ir-v06`:
-   ```bash
-   cd /home/admin && unzip -o pironman-ir-v06.zip
-   ```
-3. Validate patch without changing anything:
-   ```bash
-   sudo python3 /home/admin/pironman-ir-v06/install_v06.py
-   ```
-4. Remove the **old experimental** config entry under Settings > Devices & services (not the existing `pironman5` integration). Then apply:
-   ```bash
-   sudo python3 /home/admin/pironman-ir-v06/install_v06.py --apply
-   ```
-   The installer creates a full directory backup `.../custom_components/pironman5_ir_backup_<UTC stamp>` and changes only `__init__.py`, `config_flow.py`, `strings.json` and adds `infrared.py`. It will refuse unknown code layouts.
-5. Restart Home Assistant:
-   ```bash
-   docker restart homeassistant
-   ```
-6. In existing **Pironman 5 > Configure/Options**, turn on **Enable experimental native infrared receiver** and set IR bridge device ID to `raspberrypi`. Other devices should use distinct IDs, e.g. `pironman-living-room`, `pironman-office`.
-7. Configure systemd **after you verify** `/root/.config/pironman-ir/ha-token` exists and its permissions are 0600. Preview the unit:
-   ```bash
-   sudo python3 /home/admin/pironman-ir-v06/host/install_service.py --device-id raspberrypi
-   ```
-   Then install and enable:
-   ```bash
-   sudo python3 /home/admin/pironman-ir-v06/host/install_service.py --device-id raspberrypi --enable
-   ```
-   Default Home Assistant endpoint `http://127.0.0.1:8123` and token file path match your tested setup.
-8. Test:
-   ```bash
-   systemctl is-enabled pironman-ir-raw
-   systemctl is-active pironman-ir-raw
-   sudo journalctl -u pironman-ir-raw -n 30 --no-pager
-   ```
-   Then open HAIR Sniffer and check the receiver under the **existing Pironman 5 device**.
+```bash
+sudo install -d -m 700 /root/.config/pironman-ir
+sudo nano /root/.config/pironman-ir/ha-token
+sudo chmod 600 /root/.config/pironman-ir/ha-token
+```
 
-## Rollback
+Paste only the token in the file. Never include tokens in issues or commits.
+
+Preview the systemd service before installing (run from repository root):
+
+```bash
+sudo python3 ir_bridge/host/install_service.py --device-id raspberrypi
+```
+
+Install and enable (adapt `--ha-url` for a separate HA host):
+
+```bash
+sudo python3 ir_bridge/host/install_service.py --device-id raspberrypi --enable
+```
+
+The default API URL is `http://127.0.0.1:8123`; this only works when Home
+Assistant is reachable from the **host** at that address. Read the installer's
+`--help` before selecting another URL, token path or device ID.
+
+Under **Settings → Devices & services → Pironman 5 → Configure**, enable
+**Enable experimental native infrared receiver** on the relevant entry and
+set **IR bridge device ID** to `raspberrypi` (or the unique ID chosen above).
+Do not enable the receiver on other Pironman entries without their own host listener.
+
+## Verify
+
+```bash
+systemctl is-enabled pironman-ir-raw
+systemctl is-active pironman-ir-raw
+sudo journalctl -u pironman-ir-raw -n 30 --no-pager
+```
+
+Select the new **Pironman 5** IR receiver in **HAIR → Sniffer** and press a
+button on an infrared remote. If an older standalone experimental receiver
+exists, remove it **only after** switching HAIR to the new one.
+
+## Behavior and limitations
+
+- The bridge forwards raw pulse/space data; RC-5 toggle information is
+  retained in the waveform but is **not decoded by the bridge**.
+- Long-held buttons produce repeated frames; HAIR decides how to group them.
+- The host listener rediscovers `/dev/lircN` after device renumbering and
+  systemd restarts it after process failures.
+- Offline API periods can lose IR events; this is not a guaranteed-delivery bus.
+- IR receive only; a separate transmitter is needed for IR output.
+- Do not expose the HA REST API or the Pironman REST API to the internet.
+
+## Uninstall host listener
 
 ```bash
 sudo systemctl disable --now pironman-ir-raw
-sudo rm -f /etc/systemd/system/pironman-ir-raw.service
-sudo systemctl daemon-reload
 ```
 
-To revert the HA patch, **restore the backed-up `pironman5` directory** created by the installer (after stopping HA), then restart Home Assistant. `install_v06.py` prints the backup directory. HACS updates can replace manual edits until the changes are merged/released upstream.
+This disables the optional host listener, not the main Pironman integration.
+See [full guide](../docs/native-ir-hair.md) for further information.
 
-## Developer / GitHub PR
+## Development
 
-The integration feature consists of new `custom_components/pironman5/infrared.py` plus modifications to `__init__.py`, `config_flow.py`, `strings.json`. The host service in `host/` is an optional separately installed companion; HACS alone **cannot install a systemd service on the host**. The code should be reviewed and CI-tested against the current default branch before publishing. Do not advertise Pro Max compatibility without hardware testing.
-
-## Run tests
+The host service is `host/pironman_ir_raw_v06.py`, installed with
+`host/install_service.py`. Offline unit tests:
 
 ```bash
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s ir_bridge/tests -v
 ```

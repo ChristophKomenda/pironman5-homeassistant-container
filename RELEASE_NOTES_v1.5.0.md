@@ -1,4 +1,6 @@
-# v1.5.0 — Native IR Receiver & HAIR Support (Experimental)
+# v1.5.0 — Native IR Receiver & HAIR Support
+
+Regular GitHub release. **IR support remains experimental and opt-in.**
 
 Adds an opt-in Home Assistant native IR receiver to the existing Pironman 5
 integration, allowing the built-in Pironman 5 Max infrared receiver to work
@@ -20,3 +22,5 @@ with HAIR — without additional ESPHome IR hardware.
 - API outages can cause missed IR frames.
 
 Installation: [Native IR / HAIR guide](docs/native-ir-hair.md).
+
+Documentation: [README](README.md) · [Host bridge](ir_bridge/README.md).
