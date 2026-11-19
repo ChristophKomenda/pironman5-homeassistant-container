@@ -28,13 +28,16 @@
           "host": "Host / IP address",
           "port": "Port",
           "scan_interval": "Update interval (seconds)",
-          "model": "Pironman model (automatic detection or manual selection)"
+          "model": "Pironman model (automatic detection or manual selection)",
+          "ir_enabled": "Enable experimental native infrared receiver (requires host bridge)",
+          "ir_device_id": "IR bridge device ID (must match --device-id)"
         }
       }
     },
     "error": {
       "cannot_connect": "Unable to connect to the Pironman REST API.",
-      "unknown": "An unexpected error occurred."
+      "unknown": "An unexpected error occurred.",
+      "invalid_ir_device_id": "IR device ID must be 1-64 non-whitespace characters."
     }
   }
 }

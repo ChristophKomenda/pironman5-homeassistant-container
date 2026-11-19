@@ -37,9 +37,13 @@ async def async_setup_entry(
 
     entry.runtime_data = coordinator
 
+    platforms = [*PLATFORMS]
+    if entry.options.get("ir_enabled", False):
+        platforms.append("infrared")
+    coordinator.ir_platform_loaded = "infrared" in platforms
     await hass.config_entries.async_forward_entry_setups(
         entry,
-        PLATFORMS,
+        platforms,
     )
 
     return True
@@ -50,9 +54,12 @@ async def async_unload_entry(
     entry: PironmanConfigEntry,
 ) -> bool:
     """Unload Pironman 5."""
+    platforms = [*PLATFORMS]
+    if getattr(entry.runtime_data, "ir_platform_loaded", False):
+        platforms.append("infrared")
     return await hass.config_entries.async_unload_platforms(
         entry,
-        PLATFORMS,
+        platforms,
     )
 
 

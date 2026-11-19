@@ -10,6 +10,8 @@ from .models import AUTO, CONF_MODEL, MODEL_NAMES, resolve_model
 
 _LOGGER = logging.getLogger(__name__)
 CONF_SCAN_INTERVAL = "scan_interval"
+CONF_IR_ENABLED = "ir_enabled"
+CONF_IR_DEVICE_ID = "ir_device_id"
 
 async def validate_connection(hass, host, port):
     """Validate endpoint before saving settings."""
@@ -69,7 +71,14 @@ class Pironman5OptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             try:
                 await validate_connection(self.hass, user_input[CONF_HOST], user_input[CONF_PORT])
-                return self.async_create_entry(title="", data=user_input)
+                if user_input.get(CONF_IR_ENABLED):
+                    ident = str(user_input.get(CONF_IR_DEVICE_ID, "")).strip()
+                    if not ident or len(ident) > 64 or any(ch.isspace() for ch in ident):
+                        errors["base"] = "invalid_ir_device_id"
+                    else:
+                        user_input[CONF_IR_DEVICE_ID] = ident
+                if not errors:
+                    return self.async_create_entry(title="", data=user_input)
             except (aiohttp.ClientError, TimeoutError, ValueError) as err:
                 _LOGGER.debug("Pironman options connection error: %s", err)
                 errors["base"] = "cannot_connect"
@@ -85,6 +94,8 @@ class Pironman5OptionsFlow(config_entries.OptionsFlow):
                 vol.Required(CONF_PORT, default=opts.get(CONF_PORT, data.get(CONF_PORT, DEFAULT_PORT))): vol.All(vol.Coerce(int), vol.Range(min=1, max=65535)),
                 vol.Required(CONF_SCAN_INTERVAL, default=opts.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)): vol.All(vol.Coerce(int), vol.Range(min=5, max=60)),
                 vol.Required(CONF_MODEL, default=opts.get(CONF_MODEL, data.get(CONF_MODEL, AUTO))): vol.In([AUTO, *MODEL_NAMES]),
+                vol.Required(CONF_IR_ENABLED, default=opts.get(CONF_IR_ENABLED, False)): bool,
+                vol.Required(CONF_IR_DEVICE_ID, default=opts.get(CONF_IR_DEVICE_ID, data.get(CONF_HOST, "raspberrypi"))): str,
             }),
             errors=errors,
         )

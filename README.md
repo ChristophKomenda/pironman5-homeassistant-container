@@ -40,7 +40,7 @@ A fully local custom integration for **Home Assistant Container**, Home Assistan
 | **Connection** | Local Pironman REST API, default TCP port `34001` |
 | **Installation** | HACS (recommended) or manual |
 | **Deployment** | Same Raspberry Pi or a separate LAN host |
-| **Integration version** | `1.4.0` (check GitHub Releases for the latest published tag) |
+| **Integration version** | `1.5.0` (check GitHub Releases for the latest published tag) |
 
 The Pironman software must be installed and its REST API running. This integration does **not** replace the upstream Pironman software. Feature and sensor availability depend on your model and API version.
 
@@ -479,3 +479,17 @@ Official HACS acceptance: [hacs/default#12242](https://github.com/hacs/default/p
 Developed and maintained by [Christoph Komenda](https://github.com/ChristophKomenda).
 
 **Built for the SunFounder Pironman community.** If this integration helps you, consider starring the repository on GitHub.
+
+
+## Native IR Receiver + HAIR (v1.5.0, experimental)
+
+Pironman 5 Max users can enable an **optional native Home Assistant infrared
+receiver** for the case's built-in GPIO IR hardware. HAIR can discover the
+receiver and learn signals from supported remotes. This is **IR receive only**.
+
+**A separately installed host service is required** to read `/dev/lircN` and
+forward raw frames. HACS installs the integration, but **cannot install a
+systemd service on the Raspberry Pi host**. Hardware support has only been
+verified on Pironman 5 Max. Existing sensors and controls are unchanged.
+
+See [Native IR / HAIR setup and limitations](docs/native-ir-hair.md).
