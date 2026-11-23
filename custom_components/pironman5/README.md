@@ -2,7 +2,7 @@
 
 **Monitor and control compatible SunFounder Pironman 5 family hardware directly from Home Assistant.**
 
-A fully local custom integration for Home Assistant Container, Home Assistant OS, and other supported Home Assistant installations.
+A fully local, **cross-platform** custom integration for **Home Assistant OS and Home Assistant Container**, using the Pironman software's local REST API.
 
 The integration communicates with the Pironman software through its local REST API — **no cloud account, MQTT broker, or additional Home Assistant add-on required.**
 
@@ -10,7 +10,7 @@ The integration communicates with the Pironman software through its local REST A
 [![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5)](https://github.com/hacs/default/pull/12242)
 [![License: MIT](https://img.shields.io/github/license/ChristophKomenda/pironman5-homeassistant-container)](https://github.com/ChristophKomenda/pironman5-homeassistant-container/blob/main/LICENSE)
 
-**Local REST API · Automatic Model Detection · Hardware Monitoring · Fan Control · RGB · OLED**
+**Home Assistant OS + Container · Local REST API · Automatic Model Detection · Hardware Monitoring · Fan Control · RGB · OLED · Optional IR / HAIR**
 
 > **Official HACS default repository integration**
 >
