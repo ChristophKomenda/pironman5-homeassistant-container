@@ -80,3 +80,17 @@ been switched to the new receiver before removing the old entry.
 - HAIR may show an inferred 38 kHz carrier; GPIO receiver does not measure it.
 - Access to the Home Assistant API token is sensitive. Use a trusted network.
 - Testing is limited to Pironman 5 Max; no claims for other models.
+
+## Home Assistant OS: community add-on without manual integration copy (development)
+
+The [community Pironman IR Receiver add-on](https://github.com/ChristophKomenda/home-assistant-addon/tree/main/pironman-ir-receiver)
+can be configured with `event_mode: pironman5` and a matching `receiver_id` /
+**IR bridge device ID**. The add-on then posts `pironman5_ir_raw_received`
+events using its Supervisor API token and this existing HACS integration
+provides the native IR entity. No standalone `sunfounder_ir` copy is needed.
+
+On HAOS the Pironman REST API must still be reachable for initial configuration;
+`/dev/lirc0` and the Pi GPIO overlay must exist before the IR add-on can work.
+This is an experimental cross-repository pairing and must be tested on real HAOS
+before advertising it as a confirmed no-copy installer. Legacy host-side systemd
+and standalone add-on installations remain supported.
