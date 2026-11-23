@@ -227,6 +227,16 @@ To use it, open **Settings → Devices & Services → Pironman 5**, select your 
 
 `0` disables automatic sleep; `1–3600` seconds sets the timeout. The Always On switch is a convenient alternative to setting the value manually.
 
+### HAOS community add-on (experimental)
+
+For Home Assistant OS, the [community IR receiver add-on](https://github.com/ChristophKomenda/home-assistant-addon/tree/main/pironman-ir-receiver)
+can use `event_mode: pironman5` to send frames directly to the IR receiver
+in this HACS integration. This avoids manual copying of the standalone
+`sunfounder_ir` companion. Both sides must use the same bridge/receiver ID.
+The HAOS host must expose `/dev/lirc0`, and the Pironman REST API must be
+reachable for initial device configuration. End-to-end validation of this
+new pairing is pending; see [the IR guide](docs/native-ir-hair.md).
+
 ## Native IR receiver / HAIR (v1.5.0)
 
 **Pironman 5 Max only (verified).** To use the built-in IR receiver in HAIR:
