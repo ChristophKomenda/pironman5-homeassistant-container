@@ -4,7 +4,8 @@
 This feature is **receive-only** and **opt-in**. It has been tested on the
 Pironman 5 Max with an RC-5 remote and HAIR, but not on other case models.
 No additional ESPHome IR hardware is needed for reception, but a separate
-Python/systemd host-side listener is required.
+IR listener is required: **a community add-on on HAOS** or **a Python/systemd
+host-side service on Home Assistant Container**.
 
 ## Home Assistant (HACS)
 
@@ -14,7 +15,7 @@ In the existing Pironman 5 config entry's **Options / Configure**, enable
 The ID must be unique per host and match the value passed to the host service.
 Do not enable this feature on other devices that do not have a tested receiver.
 
-## Host bridge (required; HACS cannot install systemd host software)
+## Home Assistant Container: host bridge (required for the Container IR route)
 
 On the Raspberry Pi carrying the IR receiver, download the release source
 archive or clone the repository. The receiver must appear as `/dev/lircN`.
@@ -81,7 +82,7 @@ been switched to the new receiver before removing the old entry.
 - Access to the Home Assistant API token is sensitive. Use a trusted network.
 - Testing is limited to Pironman 5 Max; no claims for other models.
 
-## Home Assistant OS: community add-on without manual integration copy (development)
+## Home Assistant OS: community add-on without manual integration copy (validated)
 
 The [community Pironman IR Receiver add-on](https://github.com/ChristophKomenda/home-assistant-addon/tree/main/pironman-ir-receiver)
 can be configured with `event_mode: pironman5` and a matching `receiver_id` /
@@ -91,6 +92,15 @@ provides the native IR entity. No standalone `sunfounder_ir` copy is needed.
 
 On HAOS the Pironman REST API must still be reachable for initial configuration;
 `/dev/lirc0` and the Pi GPIO overlay must exist before the IR add-on can work.
-This is an experimental cross-repository pairing and must be tested on real HAOS
-before advertising it as a confirmed no-copy installer. Legacy host-side systemd
-and standalone add-on installations remain supported.
+This cross-repository pairing was **independently tested on a real HAOS setup**
+by [@eugenioparise](https://github.com/eugenioparise) on 23 November 2026.
+After selecting `event_mode: pironman5`, disabling the older `sunfounder_ir`
+integration, and setting identical receiver IDs, the tester needed to
+**reload the Pironman 5 integration** before HAIR successfully captured codes.
+Only the Pironman 5 integration receiver was active in HAIR. See the
+[community discussion](https://github.com/ChristophKomenda/pironman5-homeassistant-container/discussions/16)
+and [add-on release v0.2.0](https://github.com/ChristophKomenda/home-assistant-addon/releases/tag/pironman-ir-v0.2.0).
+
+The built-in GPIO receiver remains **receive-only**. One successful HAOS
+setup does not prove universal compatibility. Legacy host-side systemd and
+standalone add-on installations remain supported.
