@@ -17,6 +17,8 @@ A **cross-platform Home Assistant integration** for **Home Assistant OS (HAOS)**
 > **Official HACS default repository integration.** Pironman 5 was reviewed and accepted via [hacs/default#12242](https://github.com/hacs/default/pull/12242). Find **Pironman 5** directly in HACS; no custom repository URL is needed.
 
 
+[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=ChristophKomenda&repository=pironman5-homeassistant-container&category=integration)
+
 ## Quick start — choose your Home Assistant installation
 
 **Install the same Pironman 5 integration through HACS in both environments.** The Pironman software and its reachable REST API (typically port `34001`) are required in either case; the integration does not replace the SunFounder hardware service.
@@ -565,3 +567,9 @@ Official HACS acceptance: [hacs/default#12242](https://github.com/hacs/default/p
 Developed and maintained by [Christoph Komenda](https://github.com/ChristophKomenda).
 
 **Built for the SunFounder Pironman community.** If this integration helps you, consider starring the repository on GitHub.
+
+<!-- github-growth-related-projects -->
+## Related projects
+
+- [**Pironman IR Receiver**](https://github.com/ChristophKomenda/home-assistant-addon) — Built-in infrared reception for HAOS.
+- [**Home Assistant Community Apps**](https://github.com/ChristophKomenda/home-assistant-apps) — Local-first Home Assistant app catalog.
