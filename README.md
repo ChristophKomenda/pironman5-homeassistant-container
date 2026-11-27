@@ -1,4 +1,4 @@
-# Pironman 5 Family — Home Assistant Integration
+# Pironman 5 Family — Home Assistant Integration for Raspberry Pi 5
 
 **Monitor and control compatible SunFounder Pironman 5 family hardware directly from Home Assistant.**
 
@@ -573,3 +573,21 @@ Developed and maintained by [Christoph Komenda](https://github.com/ChristophKome
 
 - [**Pironman IR Receiver**](https://github.com/ChristophKomenda/home-assistant-addon) — Built-in infrared reception for HAOS.
 - [**Home Assistant Community Apps**](https://github.com/ChristophKomenda/home-assistant-apps) — Local-first Home Assistant app catalog.
+
+<!-- github-seo:begin -->
+
+## Related projects
+
+- [Infrastructure HA Monitor](https://github.com/ChristophKomenda/infrastructure-ha-monitor)
+
+## Frequently asked questions — quick answers
+
+### How do I integrate Pironman 5 into Home Assistant?
+
+Install Pironman 5 through HACS and follow the Quick Start for your Home Assistant installation type. Check the compatibility and prerequisites in this README.
+
+### Does Pironman monitoring require MQTT or a cloud account?
+
+The main integration communicates through the local REST API. See the IR / HAIR instructions for optional infrared functionality.
+
+<!-- github-seo:end -->
